@@ -92,7 +92,8 @@ This project involves creating a command-line banking application in Java. The a
 
 ---
 
-## Advanced Upgrades:
+## Advanced Upgrades
+
 1. **Account Types**:
    - **Platinum Account**:
      - Withdraw Limit: $20,000
@@ -108,9 +109,45 @@ This project involves creating a command-line banking application in Java. The a
    - Allow users to overdraft twice.
    - Apply a $50 penalty for each overdraft.
    - Example:
-     - **Current balance: $10**, withdrawal of **$20** → new balance: **-$70** (-$20 withdrawal, -$50 fee).
+     - **Current balance: $10**, withdrawal of **$20** → new balance: **-$60** (-$20 withdrawal, -$50 fee).
      - On second overdraft, apply another fee.
      - Prevent further withdrawals after the second overdraft.
 
 3. **Lockout on Failed Logins**:
-   - Lock user out after a specified number of incorrect password attempts.
+   - Lock the user out after a specified number of incorrect password attempts.
+
+4. **Favorite Feature**:
+   - Allow users to mark other users as favorites.
+   - When transferring funds, show the list of favorites before prompting for an account ID.
+
+5. **Account Deactivation**:
+   - Add a boolean field `isActive` to the `User` class.
+   - When a user deactivates their account, set `isActive` to `false`.
+   - Prevent deactivated users from logging in.
+
+6. **Support for Multiple Currencies**:
+   - Implement support for multiple currencies in the application (e.g., USD, EUR).
+   - Allow users to specify their preferred currency during signup.
+   - Include currency conversion for transfers if necessary.
+
+7. **Transaction History**:
+   - Maintain a history of all transactions for each user account.
+   - Display the complete transaction history upon user request.
+
+8. **Transaction History by Date Range**:
+   - Allow users to filter and view their transaction history within a specified date range.
+
+9. **Password Encryption**:
+   - Encrypt user passwords before storing them.
+   - Ensure passwords are securely hashed using a library like **Bcrypt** or **Argon2**.
+
+10. **User Roles**:
+    - Add support for roles:
+      - **Banker Role**: Access additional features like viewing all accounts, resetting user passwords, etc.
+      - **User Role**: Standard access to account management features.
+    - Provide different menu options and UI outputs for each role.
+
+11. **Enhanced UI/UX**:
+    - Make the CLI interface more user-friendly by:
+      - Adding clear instructions at each step.
+      - Using colored text to indicate warnings, errors, or success messages.
