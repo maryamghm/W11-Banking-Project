@@ -69,7 +69,7 @@ public class UserRepository {
     }
 
     private User createNewUser(String username, String password) {
-        if (username == null || username.isBlank())
+        if (username == null || username.isBlank() || users.containsKey(username))
             throw new IllegalArgumentException("Username is not valid.");
         if (!User.isValidPassword(password))
             throw new IllegalArgumentException("Password is not valid.");
