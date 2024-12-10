@@ -53,6 +53,7 @@ public class ConsoleApplication {
                 }
                 case 3 -> {
                     System.out.println("Goodbye!");
+                    userRepository.writeUsersInFile();
                     return false;
                 }
                 default -> System.out.println("Choose 1-3: ");

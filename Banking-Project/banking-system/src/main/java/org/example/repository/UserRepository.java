@@ -9,6 +9,7 @@ import org.example.exception.LoginFailedException;
 import org.example.exception.LogoutFailedException;
 import org.example.exception.SignupFailedException;
 import org.example.exception.UserLockedException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,6 +22,7 @@ public class UserRepository {
     private int idCounter;
     private final File dataSource;
     private final int MAX_LOGIN_ATTEMPTS = 3;
+    private static final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public UserRepository(File sourceFilePath) {
         this.dataSource = sourceFilePath;
@@ -57,8 +59,13 @@ public class UserRepository {
 
     public void writeUsersInFile() {
         CsvMapper csvMapper = new CsvMapper();
-        CsvSchema schema = csvMapper.schemaFor(User.class).withHeader();
-
+        CsvSchema schema = CsvSchema.builder()
+                .addColumn("id")
+                .addColumn("username")
+                .addColumn("password")
+                .addColumn("type")
+                .setUseHeader(true)
+                .build();
         try {
             csvMapper.writer(schema).writeValue(new File("users.csv"), users.values());
         } catch (IOException e) {
@@ -87,7 +94,7 @@ public class UserRepository {
         if (users.containsKey(username)) {
             User user = users.get(username);
             if (user.getLoginFailedAttempts() < MAX_LOGIN_ATTEMPTS) {
-                if (user.getPassword().equals(password)) {
+                if (passwordEncoder.matches(password, user.getPassword())) {
                     user.setLoginFailedAttempts(0);
                     return user;
                 }

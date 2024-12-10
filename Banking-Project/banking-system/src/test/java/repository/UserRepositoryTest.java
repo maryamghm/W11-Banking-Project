@@ -40,7 +40,7 @@ class UserRepositoryTest {
         assertNotNull(newUser);
         assertNotNull(newUser.getId());
         assertEquals(username, newUser.getUsername());
-        assertEquals(password, newUser.getPassword());
+        assertNotEquals(password, newUser.getPassword());
         assertEquals(UserType.CUSTOMER, newUser.getType());
 
         User loggedInUser = userRepository.login(username, password);

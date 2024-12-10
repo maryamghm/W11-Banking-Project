@@ -3,6 +3,7 @@ package org.example.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Data
 public class User {
@@ -21,20 +22,24 @@ public class User {
     @JsonIgnore
     private int loginFailedAttempts = 0;
 
+    @JsonIgnore
+    private static final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     public User() {
     }
 
     public User(int id, String username, String password) {
         this.id = id;
         this.username = username;
-        this.password = password;
+
+        this.password = passwordEncoder.encode(password);
     }
 
     public void setPassword(String password) {
         if (!isValidPassword(password)) {
             throw new IllegalArgumentException("Password does not meet the required criteria.");
         }
-        this.password = password;
+        this.password = passwordEncoder.encode(password);
     }
 
     public void setUsername(String username) {
