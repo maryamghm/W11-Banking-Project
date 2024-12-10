@@ -1,0 +1,3 @@
+id, username, password, type
+1, john.snow, Ab1A23456, CUSTOMER
+2, john.smith, 12Sm8585, EMPLOYEE
