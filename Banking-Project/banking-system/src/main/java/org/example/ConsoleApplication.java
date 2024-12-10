@@ -78,7 +78,9 @@ public class ConsoleApplication {
             int choice = scanner.nextInt();
             scanner.nextLine();
             switch (choice) {
-                case 1 -> {
+                case 5 -> {
+                    userRepository.logout(loggedInUser.getUsername());
+                    loggedInUser = null;
                 }
                 default -> System.out.println("Choose 1-5: ");
             }

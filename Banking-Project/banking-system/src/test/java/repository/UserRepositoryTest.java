@@ -3,6 +3,9 @@ package repository;
 import lombok.SneakyThrows;
 import org.example.domain.User;
 import org.example.domain.UserType;
+import org.example.exception.LoginFailedException;
+import org.example.exception.SignupFailedException;
+import org.example.exception.UserLockedException;
 import org.example.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,12 +28,12 @@ class UserRepositoryTest {
 
     @Test
     public void testLoadingFile() {
-        assertEquals(1, userRepository.getSize());
+        assertEquals(2, userRepository.getSize());
     }
 
     @Test
     public void testSignup() {
-        String username = "testUser1";
+        String username = "test_user1";
         String password = "Test@1234";
         User newUser = userRepository.signUp(username, password);
 
@@ -46,12 +49,44 @@ class UserRepositoryTest {
 
     @Test
     public void testDoubleSignup() {
-        String username = "testUser1";
+        String username = "test_user1";
         String password = "Test@1234";
         User newUser = userRepository.signUp(username, password);
         assertNotNull(newUser);
 
-        assertThrows(IllegalArgumentException.class, () -> userRepository.signUp(username, password));
+        assertThrows(SignupFailedException.class, () -> userRepository.signUp(username, password));
+    }
+
+    @Test
+    public void testSignupWithUppercaseUsername() {
+        String username = "testUser1";
+        String password = "Test@1234";
+
+        assertThrows(SignupFailedException.class, () -> userRepository.signUp(username, password));
+    }
+
+    @Test
+    public void testLoginWithWrongPassword() {
+        String username = "test_user2";
+        String password = "Test@1234";
+        User newUser = userRepository.signUp(username, password);
+
+        String wrongPassword = password.toLowerCase();
+        assertThrows(LoginFailedException.class, () -> userRepository.login(username, wrongPassword));
+    }
+
+    @Test
+    public void testLoginLimit() {
+        String username = "test_user2";
+        String password = "Test@1234";
+        User newUser = userRepository.signUp(username, password);
+
+        String wrongPassword = password.toLowerCase();
+        for (int i = 0; i < 3; i++) {
+            assertThrows(LoginFailedException.class, () -> userRepository.login(username, wrongPassword));
+        }
+
+        assertThrows(UserLockedException.class, () -> userRepository.login(username, wrongPassword));
     }
 
 }

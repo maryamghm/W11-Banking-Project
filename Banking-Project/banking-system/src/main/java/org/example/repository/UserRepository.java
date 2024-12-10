@@ -5,6 +5,10 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.example.domain.User;
 import org.example.domain.UserType;
+import org.example.exception.LoginFailedException;
+import org.example.exception.LogoutFailedException;
+import org.example.exception.SignupFailedException;
+import org.example.exception.UserLockedException;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +20,7 @@ public class UserRepository {
     private final Map<String, User> users = new HashMap<>();
     private int idCounter;
     private final File dataSource;
+    private final int MAX_LOGIN_ATTEMPTS = 3;
 
     public UserRepository(File sourceFilePath) {
         this.dataSource = sourceFilePath;
@@ -69,10 +74,10 @@ public class UserRepository {
     }
 
     private User createNewUser(String username, String password) {
-        if (username == null || username.isBlank() || users.containsKey(username))
-            throw new IllegalArgumentException("Username is not valid.");
+        if (username == null || username.isBlank() || !username.matches("^[^A-Z]*$") || users.containsKey(username))
+            throw new SignupFailedException("Username is not valid.");
         if (!User.isValidPassword(password))
-            throw new IllegalArgumentException("Password is not valid.");
+            throw new SignupFailedException("Password is not valid.");
         User user = new User(++idCounter, username, password);
         user.setType(UserType.CUSTOMER);
         return user;
@@ -81,11 +86,22 @@ public class UserRepository {
     public User login(String username, String password) {
         if (users.containsKey(username)) {
             User user = users.get(username);
-            if (user.getPassword().equals(password)) {
-                return user;
+            if (user.getLoginFailedAttempts() < MAX_LOGIN_ATTEMPTS) {
+                if (user.getPassword().equals(password)) {
+                    user.setLoginFailedAttempts(0);
+                    return user;
+                }
+                user.setLoginFailedAttempts(user.getLoginFailedAttempts() + 1);
+                throw new LoginFailedException("Login failed.");
             }
-            throw new IllegalArgumentException("Login failed.");
+            throw new UserLockedException();
         }
-        throw new IllegalArgumentException("Username doesn't exist!");
+        throw new LoginFailedException("Username doesn't exist!");
+    }
+
+    public void logout(String username) {
+        if (!users.containsKey(username)) {
+            throw new LogoutFailedException("Invalid username.");
+        }
     }
 }

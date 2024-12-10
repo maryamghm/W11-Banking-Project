@@ -1,5 +1,6 @@
 package org.example.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -16,6 +17,9 @@ public class User {
 
     @JsonProperty("type")
     private UserType type;
+
+    @JsonIgnore
+    private int loginFailedAttempts = 0;
 
     public User() {
     }
@@ -36,6 +40,9 @@ public class User {
     public void setUsername(String username) {
         if (username == null || username.isBlank()) {
             throw new IllegalArgumentException("UserName cannot be blank.");
+        }
+        if (!username.matches("^[^A-Z]*$")) {
+            throw new IllegalArgumentException("Username cannot contain uppercase letters.");
         }
         this.username = username;
     }
