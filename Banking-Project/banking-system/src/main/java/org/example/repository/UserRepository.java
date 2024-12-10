@@ -94,7 +94,7 @@ public class UserRepository {
         if (users.containsKey(username)) {
             User user = users.get(username);
             if (user.getLoginFailedAttempts() < MAX_LOGIN_ATTEMPTS) {
-                if (passwordEncoder.matches(password, user.getPassword())) {
+                if (user.matchPassword(password)) {
                     user.setLoginFailedAttempts(0);
                     return user;
                 }

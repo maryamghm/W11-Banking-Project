@@ -1,19 +1,52 @@
 package org.example.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Data;
 
 @Data
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type" // Field that determines the type
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = CheckingAccount.class, name = "checking"),
+        @JsonSubTypes.Type(value = SavingsAccount.class, name = "savings")
+})
+
 public abstract class Account {
-    private String accountNumber;
+    @JsonProperty("accountNumber")
+    private Integer accountNumber;
+
+    @JsonProperty("userId")
     private Integer userId;
-    private Double balance;
-    private Double withdrawLimit;
+
+    @JsonProperty("type")
+    private AccountType type;
+
+    @JsonProperty("plan")
     private AccountPlan plan;
+
+    @JsonProperty("balance")
+    private Double balance;
+
+    @JsonProperty("withdrawLimit")
+    private Double withdrawLimit;
+
+    @JsonProperty("depositLimit")
+    private Double depositLimit;
+
 
     public Account() {
     }
 
-    public abstract void withdraw();
+    public abstract void withdraw(double amount);
 
-    public abstract void deposit();
+    public void deposit(double amount) {
+        if (amount > this.getDepositLimit())
+            throw new IllegalArgumentException("deposit limit exceeds.");
+        this.setBalance(amount + this.getBalance());
+    }
 }

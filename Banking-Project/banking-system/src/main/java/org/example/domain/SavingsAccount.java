@@ -1,13 +1,11 @@
 package org.example.domain;
 
 public class SavingsAccount extends Account {
+
+    private double interestRate;
     @Override
-    public void withdraw() {
+    public void withdraw(double amount) {
 
     }
 
-    @Override
-    public void deposit() {
-
-    }
 }

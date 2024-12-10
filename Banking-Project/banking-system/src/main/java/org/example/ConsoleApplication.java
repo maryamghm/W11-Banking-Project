@@ -1,5 +1,6 @@
 package org.example;
 
+import org.example.domain.Account;
 import org.example.domain.AccountPlan;
 import org.example.domain.AccountType;
 import org.example.domain.User;
@@ -15,9 +16,11 @@ public class ConsoleApplication {
     private AccountRepository accountRepository;
     private final Scanner scanner = new Scanner(System.in);
     private User loggedInUser = null;
+    private Account userAccount = null;
 
     public void run() {
         userRepository = new UserRepository(new File("users.csv"));
+        accountRepository = new AccountRepository(new File("accounts.csv"));
         boolean isRunning = true;
         System.out.println("Welcome");
         while (isRunning) {
@@ -79,6 +82,17 @@ public class ConsoleApplication {
             int choice = scanner.nextInt();
             scanner.nextLine();
             switch (choice) {
+                case 1 -> {
+                    System.out.println("Your current balance: "
+                            + accountRepository.showUserAccountBalance(loggedInUser.getId())
+                            + "$.");
+                }
+                case 2 -> {
+                    showDepositPrompt();
+                }
+                case 3 -> {
+                    showWithdrawPrompt();
+                }
                 case 4 -> {
                     System.out.println("Enter your old password:");
                     String oldPassword = scanner.nextLine();
@@ -97,6 +111,7 @@ public class ConsoleApplication {
         }
         return true;
     }
+
 
     private void showLoginPrompt() {
         System.out.println("Please enter your username: ");
@@ -117,6 +132,60 @@ public class ConsoleApplication {
 
         User user = userRepository.signUp(username, password);
 
+
+        AccountType type = getType();
+        AccountPlan accountPlan = getPlan();
+        double withdrawLimit = getWithdrawLimit(accountPlan);
+        double initialDeposit = getInitialDeposit(accountPlan);
+
+        userAccount = accountRepository.addNewAccount(user.getId(), type, accountPlan, withdrawLimit, initialDeposit);
+        showLoginPrompt();
+    }
+
+    private double getWithdrawLimit(AccountPlan plan) {
+        double withdrawLimit = 0.0;
+        if (plan == AccountPlan.NORMAL) {
+            boolean isInputValid = true;
+            do {
+                System.out.println("Enter your maximum withdraw limit: ");
+                try {
+                    withdrawLimit = scanner.nextDouble();
+                    scanner.nextLine();
+                    accountRepository.validateNormalWithdrawLimit(withdrawLimit);
+                } catch (Exception e) {
+                    isInputValid = false;
+                    throw new RuntimeException(e);
+                }
+            } while (!isInputValid);
+        } else {
+            withdrawLimit = accountRepository.getWithdrawLimit(plan);
+        }
+        return withdrawLimit;
+    }
+
+    private AccountPlan getPlan() {
+        boolean isInputValid = true;
+        int accountPlan = -1;
+        do {
+            System.out.println("What kind of Plan do you want? "
+                    + String.join(", ", Arrays.stream(AccountPlan.values())
+                    .map(plan -> plan.ordinal() + ":" + plan.name()).toList()));
+            try {
+                accountPlan = scanner.nextInt();
+                scanner.nextLine();
+                if (accountPlan < 0 || accountPlan >= AccountPlan.values().length) {
+                    throw new IllegalArgumentException("Invalid plan type: " + accountPlan);
+                }
+
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                isInputValid = false;
+            }
+        } while (!isInputValid);
+        return AccountPlan.values()[accountPlan];
+    }
+
+    private AccountType getType() {
         boolean isInputValid = true;
         int type = -1;
         do {
@@ -135,28 +204,54 @@ public class ConsoleApplication {
                 System.out.println("Invalid account type!");
             }
         } while (!isInputValid);
+        return AccountType.values()[type];
+    }
 
-        isInputValid = true;
-        int accountPlan = -1;
+    private double getInitialDeposit(AccountPlan accountPlan) {
+        boolean isInputValid = true;
+        double initialDeposit = 0.0;
         do {
-            System.out.println("What kind of Plan do you want? "
-                    + String.join(", ", Arrays.stream(AccountPlan.values())
-                    .map(plan -> plan.ordinal() + ":" + plan.name()).toList()));
+            System.out.println("How much do you want to deposit to your account? ");
             try {
-                accountPlan = scanner.nextInt();
+                initialDeposit = scanner.nextDouble();
                 scanner.nextLine();
-                if (accountPlan < 0 || accountPlan >= AccountPlan.values().length) {
-                    throw new IllegalArgumentException("Invalid plan type: " + accountPlan);
-                }
+                accountRepository.validateDepositLimit(initialDeposit, accountPlan);
 
             } catch (Exception e) {
-                System.out.println(e.getMessage());
                 isInputValid = false;
+                System.out.println("Invalid account type!");
             }
         } while (!isInputValid);
+        return initialDeposit;
+    }
 
-        accountRepository = new AccountRepository();
-        accountRepository.addNewAccount(user.getId(), AccountType.values()[type], AccountPlan.values()[accountPlan]);
-        showLoginPrompt();
+    private void showDepositPrompt() {
+        System.out.println("How much do you want to deposit to your account? ");
+        try {
+            double amount = scanner.nextDouble();
+            scanner.nextLine();
+            if (amount <= 0.0) {
+                throw new IllegalArgumentException("Invalid amount.");
+            }
+            accountRepository.deposit(loggedInUser.getId(), amount);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void showWithdrawPrompt() {
+        System.out.println("How much do you want to withdraw from your account? ");
+        try {
+            double amount = scanner.nextDouble();
+            scanner.nextLine();
+            if (amount <= 0.0) {
+                throw new IllegalArgumentException("Invalid amount.");
+            }
+            accountRepository.withdraw(loggedInUser.getId(), amount);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
