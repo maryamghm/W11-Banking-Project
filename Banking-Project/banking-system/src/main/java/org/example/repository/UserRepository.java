@@ -111,4 +111,15 @@ public class UserRepository {
             throw new LogoutFailedException("Invalid username.");
         }
     }
+
+    public void resetPassword(String username, String oldPassword, String newPassword) {
+        if (!users.containsKey(username)) {
+            throw new IllegalArgumentException("User not found.");
+        }
+        User user = users.get(username);
+        if (!user.matchPassword(oldPassword)) {
+            throw new IllegalArgumentException("Old password doesn't match!");
+        }
+        user.setPassword(newPassword);
+    }
 }

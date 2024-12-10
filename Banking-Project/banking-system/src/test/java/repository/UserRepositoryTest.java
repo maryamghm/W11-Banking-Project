@@ -89,4 +89,16 @@ class UserRepositoryTest {
         assertThrows(UserLockedException.class, () -> userRepository.login(username, wrongPassword));
     }
 
+    @Test
+    public void testResetPassword() {
+        String username = "test_user2";
+        String password = "Test@1234";
+        userRepository.signUp(username, password);
+        User logginUser = userRepository.login(username, password);
+        String newPassword = "Test@12345";
+        userRepository.resetPassword(username, password, newPassword);
+
+        assertTrue(logginUser.matchPassword(newPassword));
+    }
+
 }

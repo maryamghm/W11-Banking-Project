@@ -79,6 +79,13 @@ public class ConsoleApplication {
             int choice = scanner.nextInt();
             scanner.nextLine();
             switch (choice) {
+                case 4 -> {
+                    System.out.println("Enter your old password:");
+                    String oldPassword = scanner.nextLine();
+                    System.out.println("Enter new password: ");
+                    String newPassword = scanner.nextLine();
+                    userRepository.resetPassword(loggedInUser.getUsername(), oldPassword, newPassword);
+                }
                 case 5 -> {
                     userRepository.logout(loggedInUser.getUsername());
                     loggedInUser = null;

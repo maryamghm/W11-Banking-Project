@@ -52,6 +52,10 @@ public class User {
         this.username = username;
     }
 
+    public boolean matchPassword(String password) {
+        return passwordEncoder.matches(password, this.password);
+    }
+
     public static boolean isValidPassword(String password) {
         if (password == null || password.length() < 6) {
             System.out.println("Password must be at least 6 characters long.");

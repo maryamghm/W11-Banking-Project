@@ -1,3 +1,2 @@
-id, username, password, type
-1, john.snow, Ab1A23456, CUSTOMER
-2, john.smith, 12Sm8585, EMPLOYEE
+id,username,password,type
+1,john.snow,"$2a$10$qK6p7eIZPP1um88SinsAWe7GQfSDSjDo3CmEMOZl8xw4/nfaauul2",CUSTOMER
