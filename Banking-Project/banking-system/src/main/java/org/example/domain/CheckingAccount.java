@@ -4,6 +4,7 @@ public class CheckingAccount extends Account {
 
     private int overdraftCounter;
     private static final int OVERDRAFT_LIMIT = 2;
+    private static final double OVERDRAFT_PENALTY = 50.0;
 
     public CheckingAccount() {
         this.overdraftCounter = 0;
@@ -14,8 +15,14 @@ public class CheckingAccount extends Account {
         if (amount > this.getWithdrawLimit()) {
             throw new IllegalArgumentException("Withdraw limit exceeds.");
         }
-
-
+        if (this.getBalance() - amount < 0.0) {
+            if (overdraftCounter < OVERDRAFT_LIMIT) {
+                overdraftCounter++;
+                this.setBalance(this.getBalance() - (amount + OVERDRAFT_PENALTY));
+            }
+            throw new IllegalArgumentException("You have reached the overdraft limit. you cannot withdraw from your account.");
+        }
+        this.setBalance(this.getBalance() - amount);
     }
 
 }

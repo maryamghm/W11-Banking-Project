@@ -54,6 +54,7 @@ public class ConsoleApplication {
                 case 3 -> {
                     System.out.println("Goodbye!");
                     userRepository.writeUsersInFile();
+                    accountRepository.writeAccountsIntoFile();
                     return false;
                 }
                 default -> System.out.println("Choose 1-3: ");
@@ -61,10 +62,6 @@ public class ConsoleApplication {
         } catch (Exception e) {
             System.err.println("ERROR: " + e.getMessage());
         }
-        return true;
-    }
-
-    private boolean showEmployeeMenu() {
         return true;
     }
 
@@ -79,9 +76,14 @@ public class ConsoleApplication {
             int choice = scanner.nextInt();
             scanner.nextLine();
             switch (choice) {
-                case 1 -> System.out.println("Your current balance: "
+                case 1 -> {
+                    System.out.println("Enter your account's pin: ");
+                    String pin = scanner.nextLine();
+                    userAccount.validatePin(pin);
+                    System.out.println("Your current balance: "
                         + userAccount.getBalance()
                         + "$.");
+                }
                 case 2 -> showDepositPrompt();
                 case 3 -> showWithdrawPrompt();
                 case 4 -> {
@@ -103,8 +105,12 @@ public class ConsoleApplication {
         return true;
     }
 
+    private boolean showEmployeeMenu() {
+        return true;
+    }
 
     private void showLoginPrompt() {
+        System.out.println("Welcome! please log into system:");
         System.out.println("Please enter your username: ");
         String username = scanner.nextLine();
 
@@ -127,13 +133,33 @@ public class ConsoleApplication {
         User user = userRepository.signUp(username, password);
 
 
-        AccountType type = getType();
-        AccountPlan accountPlan = getPlan();
+        AccountType type = inputType();
+        AccountPlan accountPlan = inputPlan();
         double withdrawLimit = getWithdrawLimit(accountPlan);
-        double initialDeposit = getInitialDeposit(accountPlan);
+        double initialDeposit = inputInitialDeposit(accountPlan);
+        String pin = inputPin();
 
-        userAccount = accountRepository.addNewAccount(user.getId(), type, accountPlan, withdrawLimit, initialDeposit);
+        userAccount = accountRepository.addNewAccount(user.getId(), pin, type, accountPlan, withdrawLimit, initialDeposit);
         showLoginPrompt();
+    }
+
+    private String inputPin() {
+        String pin = "";
+        boolean isInputValid = true;
+        do {
+            System.out.println("Enter your account pin (4 digits): ");
+            try {
+                pin = scanner.nextLine();
+                if (!pin.matches("^\\d{4}$")) {
+                    throw new IllegalArgumentException("Invalid pin format! only 4 digit.");
+                }
+
+            } catch (Exception e) {
+                isInputValid = false;
+                throw new RuntimeException(e);
+            }
+        } while (!isInputValid);
+        return pin;
     }
 
     private double getWithdrawLimit(AccountPlan plan) {
@@ -157,7 +183,7 @@ public class ConsoleApplication {
         return withdrawLimit;
     }
 
-    private AccountPlan getPlan() {
+    private AccountPlan inputPlan() {
         boolean isInputValid = true;
         int accountPlan = -1;
         do {
@@ -179,7 +205,7 @@ public class ConsoleApplication {
         return AccountPlan.values()[accountPlan];
     }
 
-    private AccountType getType() {
+    private AccountType inputType() {
         boolean isInputValid = true;
         int type = -1;
         do {
@@ -201,7 +227,7 @@ public class ConsoleApplication {
         return AccountType.values()[type];
     }
 
-    private double getInitialDeposit(AccountPlan accountPlan) {
+    private double inputInitialDeposit(AccountPlan accountPlan) {
         boolean isInputValid = true;
         double initialDeposit = 0.0;
         do {
@@ -220,6 +246,9 @@ public class ConsoleApplication {
     }
 
     private void showDepositPrompt() {
+        System.out.println("Enter your account's pin: ");
+        String pin = scanner.nextLine();
+        userAccount.validatePin(pin);
         System.out.println("How much do you want to deposit to your account? ");
         try {
             double amount = scanner.nextDouble();
@@ -235,6 +264,9 @@ public class ConsoleApplication {
     }
 
     private void showWithdrawPrompt() {
+        System.out.println("Enter your account's pin: ");
+        String pin = scanner.nextLine();
+        userAccount.validatePin(pin);
         System.out.println("How much do you want to withdraw from your account? ");
         try {
             double amount = scanner.nextDouble();

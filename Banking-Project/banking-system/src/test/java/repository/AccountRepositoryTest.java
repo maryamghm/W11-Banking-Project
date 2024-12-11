@@ -31,20 +31,21 @@ public class AccountRepositoryTest {
 
     @Test
     public void testLoadingFile() {
-        assertEquals(1, accountRepository.getSize());
+        assertEquals(2, accountRepository.getSize());
     }
 
     @Test
     public void addAccount() {
-        String username = "test_user1";
+        String username = "test_user3";
         String password = "Test@1234";
         User newUser = userRepository.signUp(username, password);
         AccountType type = AccountType.CHECKING_ACCOUNT;
         AccountPlan plan = AccountPlan.NORMAL;
         double withdrawLimit = 100.0;
         double balance = 1000;
+        String pin = "1234";
 
-        Account newAccount = accountRepository.addNewAccount(newUser.getId(), type, plan, withdrawLimit, balance);
+        Account newAccount = accountRepository.addNewAccount(newUser.getId(), pin, type, plan, withdrawLimit, balance);
 
         assertNotNull(newAccount);
         assertEquals(type, newAccount.getType());
@@ -56,21 +57,22 @@ public class AccountRepositoryTest {
 
     @Test
     public void showBalancetest() {
-        String username = "test_user1";
+        String username = "test_user3";
         String password = "Test@1234";
         User newUser = userRepository.signUp(username, password);
         AccountType type = AccountType.CHECKING_ACCOUNT;
         AccountPlan plan = AccountPlan.NORMAL;
         double withdrawLimit = 100.0;
         double balance = 1000;
+        String pin = "1234";
 
-        Account newAccount = accountRepository.addNewAccount(newUser.getId(), type, plan, withdrawLimit, balance);
+        Account newAccount = accountRepository.addNewAccount(newUser.getId(), pin, type, plan, withdrawLimit, balance);
         assertEquals(balance, newAccount.getBalance());
     }
 
     @Test
     public void validateDepositLimitTest() {
-        double amount = 250.0;
+        double amount = 400.0;
         AccountPlan accountPlan = AccountPlan.NORMAL;
 
         assertThrows(IllegalArgumentException.class, () -> accountRepository.validateDepositLimit(amount, accountPlan));
@@ -79,15 +81,16 @@ public class AccountRepositoryTest {
 
     @Test
     public void depositTest() {
-        String username = "test_user1";
+        String username = "test_user3";
         String password = "Test@1234";
         User newUser = userRepository.signUp(username, password);
         AccountType type = AccountType.CHECKING_ACCOUNT;
         AccountPlan plan = AccountPlan.NORMAL;
         double withdrawLimit = 100.0;
         double balance = 1000;
+        String pin = "1234";
 
-        Account newAccount = accountRepository.addNewAccount(newUser.getId(), type, plan, withdrawLimit, balance);
+        Account newAccount = accountRepository.addNewAccount(newUser.getId(), pin, type, plan, withdrawLimit, balance);
         double amount = 100.0;
         newAccount.deposit(amount);
         assertEquals((balance + amount), newAccount.getBalance());

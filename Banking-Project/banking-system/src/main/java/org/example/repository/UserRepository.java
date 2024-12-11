@@ -9,7 +9,6 @@ import org.example.exception.LoginFailedException;
 import org.example.exception.LogoutFailedException;
 import org.example.exception.SignupFailedException;
 import org.example.exception.UserLockedException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +21,6 @@ public class UserRepository {
     private int idCounter;
     private final File dataSource;
     private final int MAX_LOGIN_ATTEMPTS = 3;
-    private static final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public UserRepository(File sourceFilePath) {
         this.dataSource = sourceFilePath;

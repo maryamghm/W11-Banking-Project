@@ -34,7 +34,33 @@ public class AccountRepository {
         populateAccounts();
     }
 
-    public Account addNewAccount(Integer userId, AccountType type, AccountPlan plan, double withdrawLimit, double initialDeposit) {
+    private void populateAccounts() {
+        CsvMapper csvMapper = new CsvMapper();
+        CsvSchema schema = csvMapper.schemaFor(Account.class)
+                .withHeader()
+                .withColumnReordering(true);
+
+        ObjectReader reader = csvMapper.readerFor(Account.class).with(schema);
+
+        try {
+            List<Object> objects = reader.readValues(dataSource).readAll();
+            for (Object obj : objects) {
+                if (obj instanceof Account) {
+                    userAccountList.put(((Account) obj).getUserId(), (Account) obj);
+                }
+            }
+            userAccountList.values().stream()
+                    .map(Account::getAccountNumber)
+                    .max(Integer::compareTo)
+                    .orElse(0);
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public Account addNewAccount(Integer userId, String pin, AccountType type, AccountPlan plan, double withdrawLimit, double initialDeposit) {
         Account newAccount = null;
         switch (type) {
             case AccountType.CHECKING_ACCOUNT -> {
@@ -45,6 +71,7 @@ public class AccountRepository {
             }
         }
         newAccount.setUserId(userId);
+        newAccount.setPin(pin);
         newAccount.setAccountNumber(++accountNumberCounter);
         newAccount.setPlan(plan);
         newAccount.setType(type);
@@ -140,32 +167,7 @@ public class AccountRepository {
                             + DEPOSIT_LIMIT_NORMAL + "$.");
                 }
             }
-        }
-        throw new IllegalArgumentException("Invalid Account Plan.");
-    }
-
-    private void populateAccounts() {
-        CsvMapper csvMapper = new CsvMapper();
-        CsvSchema schema = csvMapper.schemaFor(Account.class)
-                .withHeader()
-                .withColumnReordering(true);
-
-        ObjectReader reader = csvMapper.readerFor(Account.class).with(schema);
-
-        try {
-            List<Object> objects = reader.readValues(dataSource).readAll();
-            for (Object obj : objects) {
-                if (obj instanceof Account) {
-                    userAccountList.put(((Account) obj).getUserId(), (Account) obj);
-                }
-            }
-            userAccountList.values().stream()
-                    .map(Account::getAccountNumber)
-                    .max(Integer::compareTo)
-                    .orElse(0);
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            default -> throw new IllegalArgumentException("Invalid Account Plan.");
         }
 
     }
@@ -179,5 +181,25 @@ public class AccountRepository {
             throw new IllegalArgumentException("No account found.");
         }
         return userAccountList.get(userId);
+    }
+
+    public void writeAccountsIntoFile() {
+        CsvMapper csvMapper = new CsvMapper();
+        CsvSchema schema = CsvSchema.builder()
+                .addColumn("accountNumber")
+                .addColumn("pin")
+                .addColumn("userId")
+                .addColumn("type")
+                .addColumn("plan")
+                .addColumn("balance")
+                .addColumn("withdrawLimit")
+                .addColumn("depositLimit")
+                .setUseHeader(true)
+                .build();
+        try {
+            csvMapper.writer(schema).writeValue(new File("accounts.csv"), userAccountList.values());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
