@@ -25,5 +25,4 @@ public class CheckingAccount extends Account {
         }
         this.setBalance(this.getBalance() - amount);
     }
-
 }

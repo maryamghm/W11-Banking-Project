@@ -43,7 +43,7 @@ public class AccountRepositoryTest {
         String pin = "1234";
 
         Account account = accountRepository.addNewAccount(user.getId(), pin, type, plan, withdrawLimit, balance);
-
+        assertDoesNotThrow(() -> account.validatePin(pin));
         assertNotNull(account);
         assertEquals(type, account.getType());
         assertEquals(type, account.getType());
@@ -53,7 +53,7 @@ public class AccountRepositoryTest {
     }
 
     @Test
-    public void showBalancetest() {
+    public void showBalanceTest() {
         User user = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD);
         AccountType type = AccountType.CHECKING_ACCOUNT;
         AccountPlan plan = AccountPlan.NORMAL;

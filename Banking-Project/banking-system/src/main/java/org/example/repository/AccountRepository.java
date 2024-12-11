@@ -26,6 +26,8 @@ public class AccountRepository {
     private Map<Integer, Account> userAccountMap = new HashMap<>();
     private Map<Integer, Account> accountNumberMap = new HashMap<>();
 
+    private static TransactionRepository transactionRepository = new TransactionRepository(new File("transactions.csv"));
+
     private int accountNumberCounter;
     private final File dataSource;
 
@@ -73,7 +75,7 @@ public class AccountRepository {
             }
         }
         newAccount.setUserId(userId);
-        newAccount.setPin(pin);
+        newAccount.setNewPin(pin);
         newAccount.setAccountNumber(++accountNumberCounter);
         newAccount.setPlan(plan);
         newAccount.setType(type);
@@ -81,6 +83,7 @@ public class AccountRepository {
         newAccount.setBalance(initialDeposit);
         newAccount.setDepositLimit(getDepositLimit(plan));
         newAccount.setActive(true);
+        logUserTransaction(newAccount, TransactionType.CREDIT, newAccount.getBalance());
 
         userAccountMap.put(userId, newAccount);
         accountNumberMap.put(newAccount.getAccountNumber(), newAccount);
@@ -201,7 +204,7 @@ public class AccountRepository {
                 .setUseHeader(true)
                 .build();
         try {
-            csvMapper.writer(schema).writeValue(new File("accounts.csv"), userAccountMap.values());
+            csvMapper.writer(schema).writeValue(dataSource, userAccountMap.values());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -224,7 +227,9 @@ public class AccountRepository {
         }
         if (accountNumberMap.get(receiverAccountNumber).getDepositLimit() >= amount) {
             accountNumberMap.get(senderAccountNumber).withdraw(amount);
+            logUserTransaction(accountNumberMap.get(senderAccountNumber), TransactionType.DEBIT, amount);
             accountNumberMap.get(receiverAccountNumber).deposit(amount);
+            logUserTransaction(accountNumberMap.get(receiverAccountNumber), TransactionType.CREDIT, amount);
         }
     }
 
@@ -233,5 +238,9 @@ public class AccountRepository {
             throw new IllegalArgumentException("Invalid account number.");
         }
         account.setActive(false);
+    }
+
+    public void logUserTransaction(Account account, TransactionType transactionType, double amount) {
+        transactionRepository.addTransaction(account, transactionType, amount);
     }
 }

@@ -2,6 +2,7 @@ package org.example;
 
 import org.example.domain.*;
 import org.example.repository.AccountRepository;
+import org.example.repository.TransactionRepository;
 import org.example.repository.UserRepository;
 
 import java.io.File;
@@ -71,33 +72,22 @@ public class ConsoleApplication {
         System.out.println("2. Deposit");
         System.out.println("3. Withdraw");
         System.out.println("4. Transfer");
-        System.out.println("5. Reset Password");
-        System.out.println("6. Deactivate account");
-        System.out.println("7. Logout");
+        System.out.println("5. Show Transactions History");
+        System.out.println("6. Reset Password");
+        System.out.println("7. Deactivate account");
+        System.out.println("8. Logout");
         try {
             int choice = scanner.nextInt();
             scanner.nextLine();
             switch (choice) {
-                case 1 -> {
-                    System.out.println("Enter your account's pin: ");
-                    String pin = scanner.nextLine();
-                    userAccount.validatePin(pin);
-                    System.out.println("Your current balance: "
-                        + userAccount.getBalance()
-                        + "$.");
-                }
+                case 1 -> showShowBalancePrompt();
                 case 2 -> showDepositPrompt();
                 case 3 -> showWithdrawPrompt();
                 case 4 -> showTransferPrompt();
-                case 5 -> {
-                    System.out.println("Enter your old password:");
-                    String oldPassword = scanner.nextLine();
-                    System.out.println("Enter new password: ");
-                    String newPassword = scanner.nextLine();
-                    userRepository.resetPassword(loggedInUser.getUsername(), oldPassword, newPassword);
-                }
-                case 6 -> showDeactivateAccountPrompt();
-                case 7 -> logOut();
+                case 5 -> showTransactionHistoryPrompt();
+                case 6 -> ShowResetPasswordPrompt();
+                case 7 -> showDeactivateAccountPrompt();
+                case 8 -> logOut();
                 default -> System.out.println("Choose 1-5: ");
             }
         } catch (Exception e) {
@@ -106,10 +96,36 @@ public class ConsoleApplication {
         return true;
     }
 
-    private void showDeactivateAccountPrompt() {
+    private void ShowResetPasswordPrompt() {
+        System.out.println("Enter your old password:");
+        String oldPassword = scanner.nextLine();
+        System.out.println("Enter new password: ");
+        String newPassword = scanner.nextLine();
+        userRepository.resetPassword(loggedInUser.getUsername(), oldPassword, newPassword);
+    }
+
+    private void showTransactionHistoryPrompt() {
+        inputAccountPin();
+        TransactionRepository transactionRepository = new TransactionRepository(new File("transactions.csv"));
+        System.out.println("Your transactions history:");
+        System.out.println(transactionRepository.getTransactions(userAccount));
+    }
+
+    private void showShowBalancePrompt() {
+        inputAccountPin();
+        System.out.println("Your current balance: "
+                + userAccount.getBalance()
+                + "$.");
+    }
+
+    private void inputAccountPin() {
         System.out.println("Enter your account's pin: ");
         String pin = scanner.nextLine();
         userAccount.validatePin(pin);
+    }
+
+    private void showDeactivateAccountPrompt() {
+        inputAccountPin();
         System.out.println("Are you sure you want to deactivate your account? (y/n)");
         try {
             String userInput = scanner.nextLine();
@@ -130,9 +146,7 @@ public class ConsoleApplication {
     }
 
     private void showTransferPrompt() {
-        System.out.println("Enter your account's pin: ");
-        String pin = scanner.nextLine();
-        userAccount.validatePin(pin);
+        inputAccountPin();
         try {
             System.out.println("Enter the accountNumber you want to transfer to: ");
             int receiverAccountNumber = scanner.nextInt();
@@ -297,9 +311,7 @@ public class ConsoleApplication {
     }
 
     private void showDepositPrompt() {
-        System.out.println("Enter your account's pin: ");
-        String pin = scanner.nextLine();
-        userAccount.validatePin(pin);
+        inputAccountPin();
         System.out.println("How much do you want to deposit to your account? ");
         try {
             double amount = scanner.nextDouble();
@@ -308,6 +320,7 @@ public class ConsoleApplication {
                 throw new IllegalArgumentException("Invalid amount.");
             }
             userAccount.deposit(amount);
+            accountRepository.logUserTransaction(userAccount, TransactionType.CREDIT, amount);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -315,9 +328,7 @@ public class ConsoleApplication {
     }
 
     private void showWithdrawPrompt() {
-        System.out.println("Enter your account's pin: ");
-        String pin = scanner.nextLine();
-        userAccount.validatePin(pin);
+        inputAccountPin();
         System.out.println("How much do you want to withdraw from your account? ");
         try {
             double amount = scanner.nextDouble();
@@ -326,6 +337,7 @@ public class ConsoleApplication {
                 throw new IllegalArgumentException("Invalid amount.");
             }
             userAccount.withdraw(amount);
+            accountRepository.logUserTransaction(userAccount, TransactionType.DEBIT, amount);
 
         } catch (Exception e) {
             throw new RuntimeException(e);

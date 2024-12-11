@@ -1,3 +1,1 @@
 accountNumber,pin,userId,type,plan,balance,withdrawLimit,depositLimit,isActive
-1,"$2a$10$vyz3Tad4H9zzP/8o8AAaZer81kn41PICM6vQaV/f1j9Ob.hOkoyv2",1,CHECKING_ACCOUNT,PLATINUM,20000.0,20000.0,30000.0,true
-2,"$2a$10$A/bjCMa4JwGTFiS05GqIROGD8543xq9FM0CMdIl8gYoPOWaoAtCoC",2,SAVINGS_ACCOUNT,NORMAL,200.0,150.0,300.0,true

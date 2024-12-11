@@ -48,7 +48,8 @@ public class UserRepository {
 
             idCounter = users.values().stream()
                     .map(User::getId)
-                    .max(Integer::compareTo).orElse(0);
+                    .max(Integer::compareTo)
+                    .orElse(0);
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -62,10 +63,11 @@ public class UserRepository {
                 .addColumn("username")
                 .addColumn("password")
                 .addColumn("type")
+                .addColumn("isActive")
                 .setUseHeader(true)
                 .build();
         try {
-            csvMapper.writer(schema).writeValue(new File("users.csv"), users.values());
+            csvMapper.writer(schema).writeValue(dataSource, users.values());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
