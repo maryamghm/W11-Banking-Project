@@ -43,6 +43,9 @@ public abstract class Account {
     @JsonProperty("depositLimit")
     private Double depositLimit;
 
+    @JsonProperty("isActive")
+    private boolean isActive;
+
     @JsonIgnore
     private static final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 

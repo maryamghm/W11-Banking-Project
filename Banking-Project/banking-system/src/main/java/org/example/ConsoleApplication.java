@@ -72,7 +72,8 @@ public class ConsoleApplication {
         System.out.println("3. Withdraw");
         System.out.println("4. Transfer");
         System.out.println("5. Reset Password");
-        System.out.println("6. Logout");
+        System.out.println("6. Deactivate account");
+        System.out.println("7. Logout");
         try {
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -95,16 +96,37 @@ public class ConsoleApplication {
                     String newPassword = scanner.nextLine();
                     userRepository.resetPassword(loggedInUser.getUsername(), oldPassword, newPassword);
                 }
-                case 6 -> {
-                    userRepository.logout(loggedInUser.getUsername());
-                    loggedInUser = null;
-                }
+                case 6 -> showDeactivateAccountPrompt();
+                case 7 -> logOut();
                 default -> System.out.println("Choose 1-5: ");
             }
         } catch (Exception e) {
             System.err.println("ERROR: " + e.getMessage());
         }
         return true;
+    }
+
+    private void showDeactivateAccountPrompt() {
+        System.out.println("Enter your account's pin: ");
+        String pin = scanner.nextLine();
+        userAccount.validatePin(pin);
+        System.out.println("Are you sure you want to deactivate your account? (y/n)");
+        try {
+            String userInput = scanner.nextLine();
+            if (userInput.equalsIgnoreCase("Y")) {
+                accountRepository.deactivateAccount(userAccount);
+                userRepository.deactivateUser(loggedInUser);
+                System.out.println("Your account was successfully deactivate! Goodbye!");
+                logOut();
+            } else if (userInput.equalsIgnoreCase("N")) {
+                System.out.println("Good that you stay with us.");
+            } else {
+                throw new IllegalArgumentException("Invalid input.");
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 
     private void showTransferPrompt() {
@@ -308,5 +330,11 @@ public class ConsoleApplication {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void logOut() {
+        userRepository.logout(loggedInUser.getUsername());
+        loggedInUser = null;
+        userAccount = null;
     }
 }

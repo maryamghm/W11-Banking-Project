@@ -80,6 +80,7 @@ public class AccountRepository {
         newAccount.setWithdrawLimit(withdrawLimit);
         newAccount.setBalance(initialDeposit);
         newAccount.setDepositLimit(getDepositLimit(plan));
+        newAccount.setActive(true);
 
         userAccountMap.put(userId, newAccount);
         accountNumberMap.put(newAccount.getAccountNumber(), newAccount);
@@ -225,5 +226,12 @@ public class AccountRepository {
             accountNumberMap.get(senderAccountNumber).withdraw(amount);
             accountNumberMap.get(receiverAccountNumber).deposit(amount);
         }
+    }
+
+    public void deactivateAccount(Account account) {
+        if (!accountNumberMap.containsKey(account.getAccountNumber())) {
+            throw new IllegalArgumentException("Invalid account number.");
+        }
+        account.setActive(false);
     }
 }

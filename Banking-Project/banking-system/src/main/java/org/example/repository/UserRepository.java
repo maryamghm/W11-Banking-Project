@@ -85,12 +85,16 @@ public class UserRepository {
             throw new SignupFailedException("Password is not valid.");
         User user = new User(++idCounter, username, password);
         user.setType(UserType.CUSTOMER);
+        user.setActive(true);
         return user;
     }
 
     public User login(String username, String password) {
         if (users.containsKey(username)) {
             User user = users.get(username);
+            if (!user.isActive()) {
+                throw new LoginFailedException("This user is already deactivated!");
+            }
             if (user.getLoginFailedAttempts() < MAX_LOGIN_ATTEMPTS) {
                 if (user.matchPassword(password)) {
                     user.setLoginFailedAttempts(0);
@@ -123,5 +127,12 @@ public class UserRepository {
 
     public String getUserInfo(int userId) {
         return "name";
+    }
+
+    public void deactivateUser(User user) {
+        if (!users.containsKey(user.getUsername())) {
+            throw new IllegalArgumentException("Invalid User.");
+        }
+        user.setActive(false);
     }
 }

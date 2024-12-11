@@ -19,6 +19,9 @@ public class User {
     @JsonProperty("type")
     private UserType type;
 
+    @JsonProperty("isActive")
+    private boolean isActive;
+
     @JsonIgnore
     private int loginFailedAttempts = 0;
 
