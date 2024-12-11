@@ -23,7 +23,8 @@ public class AccountRepository {
     private static final double DEPOSIT_LIMIT_GOLD = 15000.0;
     private static final double DEPOSIT_LIMIT_SILVER = 1500.0;
     private static final double DEPOSIT_LIMIT_NORMAL = 300.0;
-    private Map<Integer, Account> userAccountList = new HashMap<>();
+    private Map<Integer, Account> userAccountMap = new HashMap<>();
+    private Map<Integer, Account> accountNumberMap = new HashMap<>();
 
     private int accountNumberCounter;
     private final File dataSource;
@@ -46,10 +47,11 @@ public class AccountRepository {
             List<Object> objects = reader.readValues(dataSource).readAll();
             for (Object obj : objects) {
                 if (obj instanceof Account) {
-                    userAccountList.put(((Account) obj).getUserId(), (Account) obj);
+                    userAccountMap.put(((Account) obj).getUserId(), (Account) obj);
+                    accountNumberMap.put(((Account) obj).getAccountNumber(), (Account) obj);
                 }
             }
-            userAccountList.values().stream()
+            userAccountMap.values().stream()
                     .map(Account::getAccountNumber)
                     .max(Integer::compareTo)
                     .orElse(0);
@@ -79,7 +81,8 @@ public class AccountRepository {
         newAccount.setBalance(initialDeposit);
         newAccount.setDepositLimit(getDepositLimit(plan));
 
-        userAccountList.put(userId, newAccount);
+        userAccountMap.put(userId, newAccount);
+        accountNumberMap.put(newAccount.getAccountNumber(), newAccount);
         return newAccount;
     }
 
@@ -173,14 +176,14 @@ public class AccountRepository {
     }
 
     public int getSize() {
-        return userAccountList.size();
+        return userAccountMap.size();
     }
 
     public Account getUserAccount(int userId) {
-        if (!userAccountList.containsKey(userId)) {
+        if (!userAccountMap.containsKey(userId)) {
             throw new IllegalArgumentException("No account found.");
         }
-        return userAccountList.get(userId);
+        return userAccountMap.get(userId);
     }
 
     public void writeAccountsIntoFile() {
@@ -197,9 +200,30 @@ public class AccountRepository {
                 .setUseHeader(true)
                 .build();
         try {
-            csvMapper.writer(schema).writeValue(new File("accounts.csv"), userAccountList.values());
+            csvMapper.writer(schema).writeValue(new File("accounts.csv"), userAccountMap.values());
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public String getReceiverInfo(int receiverAccountNumber, UserRepository userRepository) {
+        if (!accountNumberMap.containsKey(receiverAccountNumber)) {
+            throw new IllegalArgumentException("Invalid receiver account Number");
+        }
+        int userId = accountNumberMap.get(receiverAccountNumber).getUserId();
+        return userRepository.getUserInfo(userId);
+    }
+
+    public void transfer(int senderAccountNumber, int receiverAccountNumber, double amount) {
+        if (!accountNumberMap.containsKey(receiverAccountNumber)) {
+            throw new IllegalArgumentException("Invalid receiver account Number");
+        }
+        if (!accountNumberMap.containsKey(senderAccountNumber)) {
+            throw new IllegalArgumentException("Invalid sender account Number");
+        }
+        if (accountNumberMap.get(receiverAccountNumber).getDepositLimit() >= amount) {
+            accountNumberMap.get(senderAccountNumber).withdraw(amount);
+            accountNumberMap.get(receiverAccountNumber).deposit(amount);
         }
     }
 }

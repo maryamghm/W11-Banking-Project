@@ -120,4 +120,8 @@ public class UserRepository {
         }
         user.setPassword(newPassword);
     }
+
+    public String getUserInfo(int userId) {
+        return "name";
+    }
 }

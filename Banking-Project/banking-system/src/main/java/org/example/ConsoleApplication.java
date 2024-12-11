@@ -70,8 +70,9 @@ public class ConsoleApplication {
         System.out.println("1. Show Balance");
         System.out.println("2. Deposit");
         System.out.println("3. Withdraw");
-        System.out.println("4. Reset Password");
-        System.out.println("5. Logout");
+        System.out.println("4. Transfer");
+        System.out.println("5. Reset Password");
+        System.out.println("6. Logout");
         try {
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -86,14 +87,15 @@ public class ConsoleApplication {
                 }
                 case 2 -> showDepositPrompt();
                 case 3 -> showWithdrawPrompt();
-                case 4 -> {
+                case 4 -> showTransferPrompt();
+                case 5 -> {
                     System.out.println("Enter your old password:");
                     String oldPassword = scanner.nextLine();
                     System.out.println("Enter new password: ");
                     String newPassword = scanner.nextLine();
                     userRepository.resetPassword(loggedInUser.getUsername(), oldPassword, newPassword);
                 }
-                case 5 -> {
+                case 6 -> {
                     userRepository.logout(loggedInUser.getUsername());
                     loggedInUser = null;
                 }
@@ -103,6 +105,33 @@ public class ConsoleApplication {
             System.err.println("ERROR: " + e.getMessage());
         }
         return true;
+    }
+
+    private void showTransferPrompt() {
+        System.out.println("Enter your account's pin: ");
+        String pin = scanner.nextLine();
+        userAccount.validatePin(pin);
+        try {
+            System.out.println("Enter the accountNumber you want to transfer to: ");
+            int receiverAccountNumber = scanner.nextInt();
+            scanner.nextLine();
+            System.out.println("How much do you want to transfer? ");
+            double amount = scanner.nextDouble();
+            scanner.nextLine();
+            System.out.println("Do you want to transfer "
+                    + amount + "$ to "
+                    + accountRepository.getReceiverInfo(receiverAccountNumber, userRepository)
+                    + "? (y/n)");
+            String userAgreement = scanner.nextLine();
+            if (userAgreement.equalsIgnoreCase("Y")) {
+                accountRepository.transfer(userAccount.getAccountNumber(), receiverAccountNumber, amount);
+            } else if (userAgreement.equalsIgnoreCase("N")) {
+                System.out.println("Transfer canceled.");
+            } else throw new IllegalArgumentException("Wrong input");
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 
     private boolean showEmployeeMenu() {
