@@ -90,4 +90,14 @@ class UserRepositoryTest {
         assertTrue(logginUser.matchPassword(newPassword));
     }
 
+    @Test
+    public void testLoginDeactivatedUser() {
+        userRepository.signUp(SIGNUP_USERNAME1, PASSWORD);
+        User logginUser = userRepository.login(SIGNUP_USERNAME1, PASSWORD);
+
+        userRepository.deactivateUser(logginUser);
+        assertThrows(LoginFailedException.class, () -> userRepository.login(SIGNUP_USERNAME1, PASSWORD));
+
+    }
+
 }
