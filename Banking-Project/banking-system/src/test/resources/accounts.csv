@@ -1,2 +1,2 @@
 accountNumber,userId,type,plan,balance,withdrawLimit,depositLimit
-100000,1,savings,GOLD,10000.0,10000.0,15000.0
+100000,1,SAVINGS_ACCOUNT,GOLD,10000.0,10000.0,15000.0

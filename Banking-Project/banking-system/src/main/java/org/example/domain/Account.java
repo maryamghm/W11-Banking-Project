@@ -9,11 +9,11 @@ import lombok.Data;
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
-        property = "type" // Field that determines the type
+        property = "type"
 )
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = CheckingAccount.class, name = "checking"),
-        @JsonSubTypes.Type(value = SavingsAccount.class, name = "savings")
+        @JsonSubTypes.Type(value = CheckingAccount.class, name = "CHECKING_ACCOUNT"),
+        @JsonSubTypes.Type(value = SavingsAccount.class, name = "SAVINGS_ACCOUNT")
 })
 
 public abstract class Account {

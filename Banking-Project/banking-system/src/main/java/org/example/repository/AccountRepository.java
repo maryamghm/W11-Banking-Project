@@ -170,28 +170,14 @@ public class AccountRepository {
 
     }
 
-    public double showUserAccountBalance(int userId) {
-        if (!userAccountList.containsKey(userId)) {
-            throw new IllegalArgumentException("No account found.");
-        }
-        return userAccountList.get(userId).getBalance();
-    }
-
-    public void deposit(int userId, double amount) {
-        if (!userAccountList.containsKey(userId)) {
-            throw new IllegalArgumentException("No account found.");
-        }
-        userAccountList.get(userId).deposit(amount);
-    }
-
-    public void withdraw(int userId, double amount) {
-        if (!userAccountList.containsKey(userId)) {
-            throw new IllegalArgumentException("No account found.");
-        }
-        userAccountList.get(userId).withdraw(amount);
-    }
-
     public int getSize() {
         return userAccountList.size();
+    }
+
+    public Account getUserAccount(int userId) {
+        if (!userAccountList.containsKey(userId)) {
+            throw new IllegalArgumentException("No account found.");
+        }
+        return userAccountList.get(userId);
     }
 }

@@ -1,9 +1,6 @@
 package org.example;
 
-import org.example.domain.Account;
-import org.example.domain.AccountPlan;
-import org.example.domain.AccountType;
-import org.example.domain.User;
+import org.example.domain.*;
 import org.example.repository.AccountRepository;
 import org.example.repository.UserRepository;
 
@@ -82,17 +79,11 @@ public class ConsoleApplication {
             int choice = scanner.nextInt();
             scanner.nextLine();
             switch (choice) {
-                case 1 -> {
-                    System.out.println("Your current balance: "
-                            + accountRepository.showUserAccountBalance(loggedInUser.getId())
-                            + "$.");
-                }
-                case 2 -> {
-                    showDepositPrompt();
-                }
-                case 3 -> {
-                    showWithdrawPrompt();
-                }
+                case 1 -> System.out.println("Your current balance: "
+                        + userAccount.getBalance()
+                        + "$.");
+                case 2 -> showDepositPrompt();
+                case 3 -> showWithdrawPrompt();
                 case 4 -> {
                     System.out.println("Enter your old password:");
                     String oldPassword = scanner.nextLine();
@@ -121,6 +112,9 @@ public class ConsoleApplication {
         String password = scanner.nextLine();
 
         loggedInUser = userRepository.login(username, password);
+        if (loggedInUser.getType() == UserType.CUSTOMER) {
+            userAccount = accountRepository.getUserAccount(loggedInUser.getId());
+        }
     }
 
     private void showSignupPrompt() {
@@ -233,7 +227,7 @@ public class ConsoleApplication {
             if (amount <= 0.0) {
                 throw new IllegalArgumentException("Invalid amount.");
             }
-            accountRepository.deposit(loggedInUser.getId(), amount);
+            userAccount.deposit(amount);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -248,7 +242,7 @@ public class ConsoleApplication {
             if (amount <= 0.0) {
                 throw new IllegalArgumentException("Invalid amount.");
             }
-            accountRepository.withdraw(loggedInUser.getId(), amount);
+            userAccount.withdraw(amount);
 
         } catch (Exception e) {
             throw new RuntimeException(e);

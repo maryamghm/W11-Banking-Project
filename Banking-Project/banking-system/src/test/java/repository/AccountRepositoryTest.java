@@ -65,7 +65,7 @@ public class AccountRepositoryTest {
         double balance = 1000;
 
         Account newAccount = accountRepository.addNewAccount(newUser.getId(), type, plan, withdrawLimit, balance);
-        assertEquals(balance, accountRepository.showUserAccountBalance(newUser.getId()));
+        assertEquals(balance, newAccount.getBalance());
     }
 
     @Test
@@ -89,7 +89,7 @@ public class AccountRepositoryTest {
 
         Account newAccount = accountRepository.addNewAccount(newUser.getId(), type, plan, withdrawLimit, balance);
         double amount = 100.0;
-        accountRepository.deposit(newUser.getId(), amount);
+        newAccount.deposit(amount);
         assertEquals((balance + amount), newAccount.getBalance());
     }
 
