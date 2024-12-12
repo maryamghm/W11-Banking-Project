@@ -5,6 +5,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import lombok.Data;
 import org.example.domain.*;
+import org.example.exception.InvalidPinException;
 
 import java.io.File;
 import java.io.IOException;
@@ -250,5 +251,11 @@ public class AccountRepository {
 
     public void logUserTransaction(Account account, TransactionType transactionType, double amount) {
         transactionRepository.addTransaction(account, transactionType, amount);
+    }
+
+    public void validatePin(String pin) {
+        if (!pin.matches("^\\d{4}$")) {
+            throw new InvalidPinException("Invalid pin format! only 4 digit.");
+        }
     }
 }

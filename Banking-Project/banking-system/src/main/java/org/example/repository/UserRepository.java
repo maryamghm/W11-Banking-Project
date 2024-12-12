@@ -5,10 +5,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.example.domain.User;
 import org.example.domain.UserType;
-import org.example.exception.LoginFailedException;
-import org.example.exception.LogoutFailedException;
-import org.example.exception.SignupFailedException;
-import org.example.exception.UserLockedException;
+import org.example.exception.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -89,16 +86,27 @@ public class UserRepository {
         return user;
     }
 
-    private User createNewUser(String username, String password) {
-        if (username == null || username.isBlank() || !username.matches("^[^A-Z]*$") || users.containsKey(username))
-            throw new SignupFailedException("Username is not valid.");
-        if (!User.isValidPassword(password))
-            throw new SignupFailedException("Password is not valid.");
+    public User createNewUser(String username, String password) {
+        validateUsername(username);
+        validatePassword(password);
         User user = new User(++idCounter, username, password);
         user.setType(UserType.CUSTOMER);
         user.setActive(true);
         return user;
     }
+
+    public void validateUsername(String username) {
+        if (username == null || username.isBlank() || !username.matches("^[^A-Z]*$")
+                || users.containsKey(username))
+            throw new InvalidUserNameException("Username is not valid.");
+    }
+
+    public void validatePassword(String password) {
+        if (!User.isValidPassword(password))
+            throw new InvalidPasswordException("Password is not valid.");
+    }
+
+
 
     public User login(String username, String password) {
         if (users.containsKey(username)) {

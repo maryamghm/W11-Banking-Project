@@ -1,12 +1,18 @@
 package org.example;
 
 import org.example.domain.*;
+import org.example.exception.InvalidPasswordException;
+import org.example.exception.InvalidPinException;
+import org.example.exception.InvalidUserNameException;
 import org.example.repository.AccountRepository;
 import org.example.repository.TransactionRepository;
 import org.example.repository.UserRepository;
 
 import java.io.File;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class ConsoleApplication {
@@ -113,8 +119,50 @@ public class ConsoleApplication {
 
     private void showTransactionHistoryPrompt() {
         inputAccountPin();
-        System.out.println("Your transactions history:");
-        System.out.println(transactionRepository.getTransactions(userAccount));
+        System.out.println("Choose:");
+        System.out.println("1. Show All Transactions");
+        System.out.println("2. Show Transaction History within a specified date range");
+        try {
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            switch (choice) {
+                case 1 -> {
+                    System.out.println("Your transactions history:");
+                    System.out.println(transactionRepository.getTransactions(userAccount));
+                }
+                case 2 -> {
+                    getDateAndShowTransactions();
+                }
+                default -> {
+                    throw new IllegalArgumentException("Wrong input. Accepted values: 1 or 2.");
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Wrong input. Accepted values: 1 or 2.");
+        }
+    }
+
+    private void getDateAndShowTransactions() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        System.out.println("Enter a start date in this format (dd-MM-yyyy): ");
+        String startDateString = scanner.nextLine();
+        LocalDate fromDate = LocalDate.parse(startDateString, formatter);
+        if (fromDate.isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("The date cannot be in the future. Please try again.");
+        }
+        System.out.println("Enter a end date in this format (dd-MM-yyyy): ");
+        String toDateString = scanner.nextLine();
+        LocalDate toDate = LocalDate.parse(startDateString, formatter);
+        if (toDate.isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("The date cannot be in the future. Please try again.");
+        }
+        if (toDate.isBefore(fromDate)) {
+            throw new IllegalArgumentException("The end date cannot be after start day. Please try again.");
+        }
+
+        System.out.println("Your transaction history from " + fromDate + " to " + toDate + ":");
+        System.out.println(transactionRepository.getTransactions(userAccount, fromDate, toDate));
+
     }
 
     private void showShowBalancePrompt() {
@@ -182,11 +230,8 @@ public class ConsoleApplication {
 
     private void showLoginPrompt() {
         System.out.println("Welcome! please log into system:");
-        System.out.println("Please enter your username: ");
-        String username = scanner.nextLine();
-
-        System.out.println("Please enter your password: ");
-        String password = scanner.nextLine();
+        String username = inputUsername();
+        String password = inputPassword();
 
         loggedInUser = userRepository.login(username, password);
         if (loggedInUser.getType() == UserType.CUSTOMER) {
@@ -195,124 +240,201 @@ public class ConsoleApplication {
     }
 
     private void showSignupPrompt() {
-        System.out.println("Please enter your username: ");
-        String username = scanner.nextLine();
+        String username = null;
+        String password = null;
+        username = inputUsername();
+        if (username.equals("-1")) {
+            return;
+        }
+        password = inputPassword();
+        if (password.equals("-1")) {
+            return;
+        }
 
-        System.out.println("Please enter your password: ");
-        String password = scanner.nextLine();
+
+        int inputType = inputType();
+        if (inputType == -1) {
+            return;
+        }
+        AccountType type = AccountType.values()[inputType];
+
+        int inputPlan = inputPlan();
+        if (inputPlan == -1) {
+            return;
+        }
+        AccountPlan accountPlan = AccountPlan.values()[inputPlan];
+        double withdrawLimit = getWithdrawLimit(accountPlan);
+        if (withdrawLimit == -1) {
+            return;
+        }
+        double initialDeposit = inputInitialDeposit(accountPlan);
+
+        if (initialDeposit == -1) {
+            return;
+        }
+        String pin = inputPin();
+
+        if (pin.equals("-1")) {
+            return;
+        }
 
         User user = userRepository.signUp(username, password);
-
-
-        AccountType type = inputType();
-        AccountPlan accountPlan = inputPlan();
-        double withdrawLimit = getWithdrawLimit(accountPlan);
-        double initialDeposit = inputInitialDeposit(accountPlan);
-        String pin = inputPin();
 
         userAccount = accountRepository.addNewAccount(user.getId(), pin, type, accountPlan, withdrawLimit, initialDeposit);
         showLoginPrompt();
     }
 
-    private String inputPin() {
-        String pin = "";
-        boolean isInputValid = true;
+    private String inputPassword() {
+        String password;
         do {
-            System.out.println("Enter your account pin (4 digits): ");
             try {
-                pin = scanner.nextLine();
-                if (!pin.matches("^\\d{4}$")) {
-                    throw new IllegalArgumentException("Invalid pin format! only 4 digit.");
+                System.out.println("To go back to the main menu please enter -1");
+                System.out.println("Please enter your password: ");
+                password = scanner.nextLine();
+                if (Objects.equals(password, "-1")) {
+                    break;
                 }
-
-            } catch (Exception e) {
-                isInputValid = false;
-                throw new RuntimeException(e);
+                userRepository.validatePassword(password);
+                break;
+            } catch (InvalidPasswordException e) {
+                System.out.println(e.getMessage());
             }
-        } while (!isInputValid);
+        } while (true);
+        return password;
+    }
+
+    private String inputUsername() {
+        String username;
+        do {
+            try {
+                System.out.println("To go back to the main menu please enter -1");
+                System.out.println("Please enter your username: ");
+                username = scanner.nextLine();
+                if (Objects.equals(username, "-1")) {
+                    break;
+                }
+                userRepository.validateUsername(username);
+                break;
+            } catch (InvalidUserNameException e) {
+                System.out.println(e.getMessage());
+            }
+        } while (true);
+        return username;
+    }
+
+    private String inputPin() {
+        String pin;
+        do {
+            try {
+                System.out.println("To go back to the main menu please enter -1");
+                System.out.println("Set your account pin (4 digits): ");
+                pin = scanner.nextLine();
+                if (Objects.equals(pin, "-1")) {
+                    break;
+                }
+                accountRepository.validatePin(pin);
+                ;
+                break;
+            } catch (InvalidPinException e) {
+                System.out.println(e.getMessage());
+            }
+        } while (true);
         return pin;
     }
 
     private double getWithdrawLimit(AccountPlan plan) {
         double withdrawLimit = 0.0;
         if (plan == AccountPlan.NORMAL) {
-            boolean isInputValid = true;
             do {
-                System.out.println("Enter your maximum withdraw limit: ");
                 try {
+                    System.out.println("To go back to the main menu please enter -1");
+                    System.out.println("Enter your maximum withdraw limit: ");
                     withdrawLimit = scanner.nextDouble();
                     scanner.nextLine();
+                    if (withdrawLimit == -1) {
+                        break;
+                    }
                     accountRepository.validateNormalWithdrawLimit(withdrawLimit);
+                    break;
                 } catch (Exception e) {
-                    isInputValid = false;
-                    throw new RuntimeException(e);
+                    System.out.println(e.getMessage());
                 }
-            } while (!isInputValid);
+            } while (true);
         } else {
             withdrawLimit = accountRepository.getWithdrawLimit(plan);
         }
         return withdrawLimit;
     }
 
-    private AccountPlan inputPlan() {
-        boolean isInputValid = true;
-        int accountPlan = -1;
+    private int inputPlan() {
+        int accountPlan;
         do {
-            System.out.println("What kind of Plan do you want? "
+            try {
+                System.out.println("To go back to the main menu please enter -1");
+                System.out.println("What kind of Plan do you want? "
                     + String.join(", ", Arrays.stream(AccountPlan.values())
                     .map(plan -> plan.ordinal() + ":" + plan.name()).toList()));
-            try {
+
                 accountPlan = scanner.nextInt();
                 scanner.nextLine();
+                if (accountPlan == -1) {
+                    break;
+                }
                 if (accountPlan < 0 || accountPlan >= AccountPlan.values().length) {
                     throw new IllegalArgumentException("Invalid plan type: " + accountPlan);
                 }
-
+                break;
             } catch (Exception e) {
                 System.out.println(e.getMessage());
-                isInputValid = false;
             }
-        } while (!isInputValid);
-        return AccountPlan.values()[accountPlan];
+        } while (true);
+        return accountPlan;
     }
 
-    private AccountType inputType() {
-        boolean isInputValid = true;
-        int type = -1;
+    private int inputType() {
+        int type;
         do {
-            System.out.println("What kind of Account do you want? "
+            try {
+                System.out.println("To go back to the main menu please enter -1");
+                System.out.println("What kind of Account do you want? "
                     + String.join(", ", Arrays.stream(AccountType.values())
                     .map(plan -> plan.ordinal() + ":" + plan.name()).toList()));
-            try {
                 type = scanner.nextInt();
                 scanner.nextLine();
+                if (type == -1) {
+                    break;
+                }
                 if (type < 0 || type >= AccountType.values().length) {
                     throw new IllegalArgumentException("Invalid account type: " + type);
                 }
+                break;
 
             } catch (Exception e) {
-                isInputValid = false;
                 System.out.println("Invalid account type!");
             }
-        } while (!isInputValid);
-        return AccountType.values()[type];
+        } while (true);
+        return type;
     }
 
     private double inputInitialDeposit(AccountPlan accountPlan) {
-        boolean isInputValid = true;
-        double initialDeposit = 0.0;
+        double initialDeposit;
         do {
-            System.out.println("How much do you want to deposit to your account? ");
             try {
+                System.out.println("To go back to the main menu please enter -1");
+                System.out.println("How much do you want to deposit to your account? ");
                 initialDeposit = scanner.nextDouble();
                 scanner.nextLine();
+
+                if (initialDeposit == -1) {
+                    break;
+                }
                 accountRepository.validateDepositLimit(initialDeposit, accountPlan);
+                break;
 
             } catch (Exception e) {
-                isInputValid = false;
                 System.out.println("Invalid account type!");
             }
-        } while (!isInputValid);
+        } while (true);
         return initialDeposit;
     }
 
