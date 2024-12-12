@@ -1,1 +1,5 @@
 id,username,password,type,isActive
+4,test4,"94ba69fdd6ac7c1576e4b079514aa04004822824",CUSTOMER,true
+2,test2,"94ba69fdd6ac7c1576e4b079514aa04004822824",CUSTOMER,true
+3,test3,"94ba69fdd6ac7c1576e4b079514aa04004822824",CUSTOMER,true
+1,test1,"94ba69fdd6ac7c1576e4b079514aa04004822824",CUSTOMER,true

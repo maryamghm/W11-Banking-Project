@@ -152,7 +152,7 @@ public class ConsoleApplication {
         }
         System.out.println("Enter a end date in this format (dd-MM-yyyy): ");
         String toDateString = scanner.nextLine();
-        LocalDate toDate = LocalDate.parse(startDateString, formatter);
+        LocalDate toDate = LocalDate.parse(toDateString, formatter);
         if (toDate.isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("The date cannot be in the future. Please try again.");
         }
