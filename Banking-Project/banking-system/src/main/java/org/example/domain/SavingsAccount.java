@@ -1,6 +1,12 @@
 package org.example.domain;
 
+import static org.example.domain.AccountType.SAVINGS_ACCOUNT;
+
 public class SavingsAccount extends Account {
+    public SavingsAccount() {
+        setType(SAVINGS_ACCOUNT);
+        this.setOverdraftCounter(0);
+    }
 
     private double interestRate;
     @Override

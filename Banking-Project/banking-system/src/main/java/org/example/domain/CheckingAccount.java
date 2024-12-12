@@ -1,13 +1,13 @@
 package org.example.domain;
 
-public class CheckingAccount extends Account {
+import static org.example.domain.AccountType.CHECKING_ACCOUNT;
 
-    private int overdraftCounter;
+public class CheckingAccount extends Account {
     private static final int OVERDRAFT_LIMIT = 2;
     private static final double OVERDRAFT_PENALTY = 50.0;
 
     public CheckingAccount() {
-        this.overdraftCounter = 0;
+        setType(CHECKING_ACCOUNT);
     }
 
     @Override
@@ -16,10 +16,10 @@ public class CheckingAccount extends Account {
             throw new IllegalArgumentException("Withdraw limit exceeds.");
         }
         if (this.getBalance() - amount < 0.0) {
-            if (overdraftCounter == OVERDRAFT_LIMIT) {
+            if (this.getOverdraftCounter() == OVERDRAFT_LIMIT) {
                 throw new IllegalArgumentException("You have reached the overdraft limit. you cannot withdraw from your account.");
             }
-            overdraftCounter++;
+            this.setOverdraftCounter(this.getOverdraftCounter() + 1);
             this.setBalance(this.getBalance() - (amount + OVERDRAFT_PENALTY));
             return;
         }

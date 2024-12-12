@@ -46,6 +46,9 @@ public abstract class Account {
     @JsonProperty("isActive")
     private boolean isActive;
 
+    @JsonProperty("overdraftCounter")
+    private int overdraftCounter;
+
     @JsonIgnore
     private static final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -67,11 +70,11 @@ public abstract class Account {
         if (!pin.matches("^\\d{4}$")) {
             throw new IllegalArgumentException("Invalid pin format! Only 4 digits.");
         }
-        this.pin = passwordEncoder.encode(pin);
+        this.pin = PasswordHashing.hashPasswordSHA1(pin);
     }
 
     public void validatePin(String pin) {
-        if (!passwordEncoder.matches(pin, this.pin)) {
+        if (!PasswordHashing.hashPasswordSHA1(pin).equals(this.pin)) {
             throw new IllegalArgumentException("Pin doesn't match");
         }
     }

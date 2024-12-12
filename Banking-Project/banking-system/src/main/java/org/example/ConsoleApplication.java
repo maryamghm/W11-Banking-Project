@@ -231,7 +231,8 @@ public class ConsoleApplication {
     private void showLoginPrompt() {
         System.out.println("Welcome! please log into system:");
         String username = inputUsername(false);
-        String password = inputPassword();
+        System.out.println("Enter yor password:");
+        String password = scanner.nextLine();
 
         loggedInUser = userRepository.login(username, password);
         if (loggedInUser.getType() == UserType.CUSTOMER) {
