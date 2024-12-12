@@ -87,7 +87,7 @@ public class UserRepository {
     }
 
     public User createNewUser(String username, String password) {
-        validateUsername(username);
+        validateUsername(username, true);
         validatePassword(password);
         User user = new User(++idCounter, username, password);
         user.setType(UserType.CUSTOMER);
@@ -95,17 +95,19 @@ public class UserRepository {
         return user;
     }
 
-    public void validateUsername(String username) {
-        if (username == null || username.isBlank() || !username.matches("^[^A-Z]*$")
-                || users.containsKey(username))
-            throw new InvalidUserNameException("Username is not valid.");
+    public void validateUsername(String username, boolean isNewUser) {
+        if (isNewUser && users.containsKey(username)) {
+            throw new InvalidPasswordException("Username is already exists");
+        }
+        if (username == null || username.isBlank() || !username.matches("^[^A-Z]*$")) {
+            throw new InvalidUserNameException("Username is not valid. It shoudn't contain any Uppercase letters.");
+        }
     }
 
     public void validatePassword(String password) {
         if (!User.isValidPassword(password))
             throw new InvalidPasswordException("Password is not valid.");
     }
-
 
 
     public User login(String username, String password) {

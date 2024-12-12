@@ -230,7 +230,7 @@ public class ConsoleApplication {
 
     private void showLoginPrompt() {
         System.out.println("Welcome! please log into system:");
-        String username = inputUsername();
+        String username = inputUsername(false);
         String password = inputPassword();
 
         loggedInUser = userRepository.login(username, password);
@@ -242,7 +242,7 @@ public class ConsoleApplication {
     private void showSignupPrompt() {
         String username = null;
         String password = null;
-        username = inputUsername();
+        username = inputUsername(true);
         if (username.equals("-1")) {
             return;
         }
@@ -303,7 +303,7 @@ public class ConsoleApplication {
         return password;
     }
 
-    private String inputUsername() {
+    private String inputUsername(boolean isNewUser) {
         String username;
         do {
             try {
@@ -313,7 +313,7 @@ public class ConsoleApplication {
                 if (Objects.equals(username, "-1")) {
                     break;
                 }
-                userRepository.validateUsername(username);
+                userRepository.validateUsername(username, isNewUser);
                 break;
             } catch (InvalidUserNameException e) {
                 System.out.println(e.getMessage());
