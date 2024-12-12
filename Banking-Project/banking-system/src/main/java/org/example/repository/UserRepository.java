@@ -22,9 +22,18 @@ public class UserRepository {
     private final File dataSource;
     private final int MAX_LOGIN_ATTEMPTS = 3;
 
-    public UserRepository(File sourceFilePath) {
-        this.dataSource = sourceFilePath;
+    private static UserRepository userRepositoryInstance = null;
+
+    private UserRepository(File dataSource) {
+        this.dataSource = dataSource;
         populateUsersList();
+    }
+
+    public static UserRepository getInstance(File datasource) {
+        if (userRepositoryInstance == null) {
+            return userRepositoryInstance = new UserRepository(datasource);
+        }
+        return userRepositoryInstance;
     }
 
     public int getSize() {

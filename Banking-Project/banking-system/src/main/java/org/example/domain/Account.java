@@ -70,10 +70,6 @@ public abstract class Account {
         this.pin = passwordEncoder.encode(pin);
     }
 
-    public String getPin() {
-        throw new UnsupportedOperationException("Cannot retrieve plain text pin");
-    }
-
     public void validatePin(String pin) {
         if (!passwordEncoder.matches(pin, this.pin)) {
             throw new IllegalArgumentException("Pin doesn't match");

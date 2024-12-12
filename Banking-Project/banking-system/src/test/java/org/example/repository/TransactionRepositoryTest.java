@@ -22,7 +22,7 @@ class TransactionRepositoryTest {
     @SneakyThrows
     public void setup() {
         URI filePath = getClass().getClassLoader().getResource("transactions.csv").toURI();
-        transactionRepository = new TransactionRepository(new File(filePath));
+        transactionRepository = TransactionRepository.getInstance(new File(filePath));
         account = new CheckingAccount();
         account.setAccountNumber(1);
     }

@@ -27,9 +27,18 @@ public class TransactionRepository {
             .withHeader()
             .withColumnReordering(true);
 
-    public TransactionRepository(File dataSource) {
+    private static TransactionRepository transactionRepositoryInstance = null;
+
+    private TransactionRepository(File dataSource) {
         this.dataSource = dataSource;
         this.transactions = new ArrayList<>(loadTransactions());
+    }
+
+    public static TransactionRepository getInstance(File dataSource) {
+        if (transactionRepositoryInstance == null) {
+            return transactionRepositoryInstance = new TransactionRepository(dataSource);
+        }
+        return transactionRepositoryInstance;
     }
 
     @SneakyThrows

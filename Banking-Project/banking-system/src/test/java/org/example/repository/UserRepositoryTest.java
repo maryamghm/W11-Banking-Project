@@ -6,6 +6,7 @@ import org.example.domain.UserType;
 import org.example.exception.LoginFailedException;
 import org.example.exception.SignupFailedException;
 import org.example.exception.UserLockedException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +25,12 @@ class UserRepositoryTest {
     @SneakyThrows
     public void setup() {
         URI filePath = getClass().getClassLoader().getResource("users.csv").toURI();
-        userRepository = new UserRepository(new File(filePath));
+        userRepository = UserRepository.getInstance(new File(filePath));
+    }
+
+    @AfterEach
+    public void deleteUsers() {
+
     }
 
     @Test

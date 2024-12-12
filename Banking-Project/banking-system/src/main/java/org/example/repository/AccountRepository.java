@@ -26,15 +26,22 @@ public class AccountRepository {
     private Map<Integer, Account> userAccountMap = new HashMap<>();
     private Map<Integer, Account> accountNumberMap = new HashMap<>();
 
-    private static TransactionRepository transactionRepository = new TransactionRepository(new File("transactions.csv"));
+    private static TransactionRepository transactionRepository = TransactionRepository.getInstance(new File("transactions.csv"));
 
     private int accountNumberCounter;
     private final File dataSource;
+    private static AccountRepository accountRepositoryInstance = null;
 
-    public AccountRepository(File dataSource) {
-
+    private AccountRepository(File dataSource) {
         this.dataSource = dataSource;
         populateAccounts();
+    }
+
+    public static AccountRepository getInstance(File dataSource) {
+        if (accountRepositoryInstance == null) {
+            return accountRepositoryInstance = new AccountRepository(dataSource);
+        }
+        return accountRepositoryInstance;
     }
 
     private void populateAccounts() {
@@ -201,6 +208,7 @@ public class AccountRepository {
                 .addColumn("balance")
                 .addColumn("withdrawLimit")
                 .addColumn("depositLimit")
+                .addColumn("isActive")
                 .setUseHeader(true)
                 .build();
         try {

@@ -23,9 +23,9 @@ public class AccountRepositoryTest {
     @SneakyThrows
     public void setup() {
         URI filePath = getClass().getClassLoader().getResource("accounts.csv").toURI();
-        accountRepository = new AccountRepository(new File(filePath));
+        accountRepository = AccountRepository.getInstance(new File(filePath));
         URI usersFilePath = getClass().getClassLoader().getResource("users.csv").toURI();
-        userRepository = new UserRepository(new File(usersFilePath));
+        userRepository = UserRepository.getInstance(new File(usersFilePath));
     }
 
     @Test
@@ -46,10 +46,12 @@ public class AccountRepositoryTest {
         assertDoesNotThrow(() -> account.validatePin(pin));
         assertNotNull(account);
         assertEquals(type, account.getType());
-        assertEquals(type, account.getType());
+        assertEquals(plan, account.getPlan());
         assertEquals(user.getId(), account.getUserId());
         assertEquals(withdrawLimit, account.getWithdrawLimit());
         assertEquals(balance, account.getBalance());
+
+        accountRepository.writeAccountsIntoFile();
     }
 
     @Test

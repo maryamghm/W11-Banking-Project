@@ -18,9 +18,9 @@ public class ConsoleApplication {
     private Account userAccount = null;
 
     public void run() {
-        userRepository = new UserRepository(new File("users.csv"));
-        accountRepository = new AccountRepository(new File("accounts.csv"));
-        transactionRepository = new TransactionRepository(new File("transactions.csv"));
+        userRepository = UserRepository.getInstance(new File("users.csv"));
+        accountRepository = AccountRepository.getInstance(new File("accounts.csv"));
+        transactionRepository = TransactionRepository.getInstance(new File("transactions.csv"));
         boolean isRunning = true;
         System.out.println("Welcome");
         while (isRunning) {
