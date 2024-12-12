@@ -9,6 +9,7 @@ import org.example.domain.TransactionType;
 import org.example.utils.CsvMapperUtils;
 
 import java.io.File;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +58,16 @@ public class TransactionRepository {
     public List<Transaction> getTransactions(Account account) {
         return transactions.stream()
                 .filter(transaction -> transaction.getAccountNumber().equals(account.getAccountNumber()))
+                .toList();
+    }
+
+    @SneakyThrows
+    public List<Transaction> getTransactions(Account account, LocalDate fromDate, LocalDate toDate) {
+        LocalDateTime fromDateTime = fromDate.atStartOfDay();
+        LocalDateTime toDateTime = toDate.atStartOfDay();
+        return getTransactions(account)
+                .stream()
+                .filter(transaction -> transaction.getTimestamp().isAfter(fromDateTime) && transaction.getTimestamp().isBefore(toDateTime))
                 .toList();
     }
 
