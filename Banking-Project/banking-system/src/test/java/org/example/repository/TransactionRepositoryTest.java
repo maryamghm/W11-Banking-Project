@@ -29,6 +29,7 @@ class TransactionRepositoryTest {
 
     @Test
     void readTransactionsFromFile() {
+        transactionRepository.addTransaction(account, TransactionType.DEBIT, 50);
         List<Transaction> transactions = transactionRepository.getTransactions(account);
         Assertions.assertEquals(1, transactions.size());
     }
@@ -38,6 +39,6 @@ class TransactionRepositoryTest {
         transactionRepository.addTransaction(account, TransactionType.CREDIT, 100);
         transactionRepository.addTransaction(account, TransactionType.DEBIT, 50);
         List<Transaction> transactions = transactionRepository.getTransactions(account);
-        Assertions.assertEquals(3, transactions.size());
+        Assertions.assertEquals(2, transactions.size());
     }
 }

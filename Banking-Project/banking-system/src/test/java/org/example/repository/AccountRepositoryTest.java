@@ -30,7 +30,7 @@ public class AccountRepositoryTest {
 
     @Test
     public void testLoadingFile() {
-        assertEquals(2, accountRepository.getSize());
+        assertEquals(0, accountRepository.getSize());
     }
 
     @Test

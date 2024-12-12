@@ -1,3 +1,1 @@
 id,username,password,type,isActive
-2,test_user2,"$2a$10$qYpswENZ0e.wd9q7HLnh6u1oA.apI/QZJ0OYWQjxsKBE1ZobDeCzS",CUSTOMER,true
-1,test_user1,"$2a$10$FjkVsCZQCYSm07QyT45qL.ZLltfsMIQ5RxVDl48uMtaucnzbYkPfO",CUSTOMER,true

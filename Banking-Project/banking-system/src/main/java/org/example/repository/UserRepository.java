@@ -31,7 +31,7 @@ public class UserRepository {
         return users.size();
     }
 
-    private void populateUsersList() {
+    public void populateUsersList() {
         CsvMapper csvMapper = new CsvMapper();
         CsvSchema schema = csvMapper.schemaFor(User.class)
                 .withHeader()

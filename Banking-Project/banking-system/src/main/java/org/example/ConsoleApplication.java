@@ -12,6 +12,7 @@ import java.util.Scanner;
 public class ConsoleApplication {
     private UserRepository userRepository;
     private AccountRepository accountRepository;
+    private TransactionRepository transactionRepository;
     private final Scanner scanner = new Scanner(System.in);
     private User loggedInUser = null;
     private Account userAccount = null;
@@ -19,6 +20,7 @@ public class ConsoleApplication {
     public void run() {
         userRepository = new UserRepository(new File("users.csv"));
         accountRepository = new AccountRepository(new File("accounts.csv"));
+        transactionRepository = new TransactionRepository(new File("transactions.csv"));
         boolean isRunning = true;
         System.out.println("Welcome");
         while (isRunning) {
@@ -53,9 +55,7 @@ public class ConsoleApplication {
                     showLoginPrompt();
                 }
                 case 3 -> {
-                    System.out.println("Goodbye!");
-                    userRepository.writeUsersInFile();
-                    accountRepository.writeAccountsIntoFile();
+                    exitSystem();
                     return false;
                 }
                 default -> System.out.println("Choose 1-3: ");
@@ -64,6 +64,13 @@ public class ConsoleApplication {
             System.err.println("ERROR: " + e.getMessage());
         }
         return true;
+    }
+
+    private void exitSystem() {
+        System.out.println("Goodbye!");
+        userRepository.writeUsersInFile();
+        accountRepository.writeAccountsIntoFile();
+        transactionRepository.saveTransactions();
     }
 
     private boolean showCustomerMenu() {
@@ -106,7 +113,6 @@ public class ConsoleApplication {
 
     private void showTransactionHistoryPrompt() {
         inputAccountPin();
-        TransactionRepository transactionRepository = new TransactionRepository(new File("transactions.csv"));
         System.out.println("Your transactions history:");
         System.out.println(transactionRepository.getTransactions(userAccount));
     }

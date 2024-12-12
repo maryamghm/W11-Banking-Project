@@ -83,10 +83,10 @@ public class AccountRepository {
         newAccount.setBalance(initialDeposit);
         newAccount.setDepositLimit(getDepositLimit(plan));
         newAccount.setActive(true);
-        logUserTransaction(newAccount, TransactionType.CREDIT, newAccount.getBalance());
 
         userAccountMap.put(userId, newAccount);
         accountNumberMap.put(newAccount.getAccountNumber(), newAccount);
+        logUserTransaction(newAccount, TransactionType.CREDIT, newAccount.getBalance());
         return newAccount;
     }
 

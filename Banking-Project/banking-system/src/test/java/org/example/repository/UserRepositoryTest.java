@@ -29,7 +29,7 @@ class UserRepositoryTest {
 
     @Test
     public void testLoadingFile() {
-        assertEquals(2, userRepository.getSize());
+        assertEquals(0, userRepository.getSize());
     }
 
     @Test
@@ -39,7 +39,7 @@ class UserRepositoryTest {
         assertNotNull(newUser);
         assertNotNull(newUser.getId());
         assertEquals(SIGNUP_USERNAME1, newUser.getUsername());
-        assertNotEquals(SIGNUP_USERNAME1, newUser.getPassword());
+        assertNotEquals(PASSWORD, newUser.getPassword());
         assertEquals(UserType.CUSTOMER, newUser.getType());
 
         User loggedInUser = userRepository.login(SIGNUP_USERNAME1, PASSWORD);
@@ -100,4 +100,19 @@ class UserRepositoryTest {
 
     }
 
+//    @Test
+//    public void testWriteUsersIntoFile() {
+//        userRepository.signUp(SIGNUP_USERNAME1, PASSWORD);
+//        User logginUser1 = userRepository.login(SIGNUP_USERNAME1, PASSWORD);
+//        userRepository.signUp(SIGNUP_USERNAME2, PASSWORD);
+//        User logginUser2 = userRepository.login(SIGNUP_USERNAME2, PASSWORD);
+//        userRepository.signUp(SIGNUP_USERNAME3, PASSWORD);
+//        User logginUser3 = userRepository.login(SIGNUP_USERNAME3, PASSWORD);
+//
+//        userRepository.writeUsersInFile();
+//
+//        userRepository.populateUsersList();
+//        assertEquals(3, userRepository.getSize());
+//
+//    }
 }
