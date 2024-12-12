@@ -77,6 +77,7 @@ public class AccountRepository {
         switch (type) {
             case AccountType.CHECKING_ACCOUNT -> {
                 newAccount = new CheckingAccount();
+                newAccount.setOverdraftCounter(0);
             }
             case AccountType.SAVINGS_ACCOUNT -> {
                 newAccount = new SavingsAccount();
@@ -210,6 +211,7 @@ public class AccountRepository {
                 .addColumn("withdrawLimit")
                 .addColumn("depositLimit")
                 .addColumn("isActive")
+                .addColumn("overdraftCounter")
                 .setUseHeader(true)
                 .build();
         try {

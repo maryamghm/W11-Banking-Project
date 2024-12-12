@@ -143,7 +143,7 @@ public class UserRepository {
         if (!user.matchPassword(oldPassword)) {
             throw new IllegalArgumentException("Old password doesn't match!");
         }
-        user.setPassword(newPassword);
+        user.setRawPassword(newPassword);
     }
 
     public String getUserInfo(int userId) {

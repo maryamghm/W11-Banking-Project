@@ -34,29 +34,18 @@ public class User {
     public User(int id, String username, String password) {
         this.id = id;
         this.username = username;
-
-        this.password = passwordEncoder.encode(password);
+        setRawPassword(password);
     }
 
-    public void setPassword(String password) {
+    public void setRawPassword(String password) {
         if (!isValidPassword(password)) {
             throw new IllegalArgumentException("Password does not meet the required criteria.");
         }
-        this.password = passwordEncoder.encode(password);
-    }
-
-    public void setUsername(String username) {
-        if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException("UserName cannot be blank.");
-        }
-        if (!username.matches("^[^A-Z]*$")) {
-            throw new IllegalArgumentException("Username cannot contain uppercase letters.");
-        }
-        this.username = username;
+        this.password = PasswordHashing.hashPasswordSHA1(password);
     }
 
     public boolean matchPassword(String password) {
-        return passwordEncoder.matches(password, this.password);
+        return (PasswordHashing.hashPasswordSHA1(password).equals(this.password));
     }
 
     public static boolean isValidPassword(String password) {

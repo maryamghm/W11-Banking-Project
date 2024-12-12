@@ -121,4 +121,14 @@ class UserRepositoryTest {
 //        assertEquals(3, userRepository.getSize());
 //
 //    }
+
+    @Test
+    public void testLoginWithLoadedData() {
+        userRepository.populateUsersList();
+        String username = "test2";
+        String password = "Test@1234";
+
+        User loggedInUser = userRepository.login(username, password);
+        assertEquals("test2", loggedInUser.getUsername());
+    }
 }
