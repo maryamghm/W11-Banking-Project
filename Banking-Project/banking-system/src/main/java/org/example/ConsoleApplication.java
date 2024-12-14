@@ -12,6 +12,7 @@ import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -85,10 +86,11 @@ public class ConsoleApplication {
         System.out.println("2. Deposit");
         System.out.println("3. Withdraw");
         System.out.println("4. Transfer");
-        System.out.println("5. Show Transactions History");
-        System.out.println("6. Reset Password");
-        System.out.println("7. Deactivate account");
-        System.out.println("8. Logout");
+        System.out.println("5. Favorite Account");
+        System.out.println("6. Show Transactions History");
+        System.out.println("7. Reset Password");
+        System.out.println("8. Deactivate account");
+        System.out.println("9. Logout");
         try {
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -97,11 +99,12 @@ public class ConsoleApplication {
                 case 2 -> showDepositPrompt();
                 case 3 -> showWithdrawPrompt();
                 case 4 -> showTransferPrompt();
-                case 5 -> showTransactionHistoryPrompt();
-                case 6 -> ShowResetPasswordPrompt();
-                case 7 -> showDeactivateAccountPrompt();
-                case 8 -> logOut();
-                default -> System.out.println("Choose 1-5: ");
+                case 5 -> showFavoriteAccountsMenu();
+                case 6 -> showTransactionHistoryPrompt();
+                case 7 -> ShowResetPasswordPrompt();
+                case 8 -> showDeactivateAccountPrompt();
+                case 9 -> logOut();
+                default -> System.out.println("Choose 1-9: ");
             }
         } catch (Exception e) {
             System.err.println("ERROR: " + e.getMessage());
@@ -109,7 +112,84 @@ public class ConsoleApplication {
         return true;
     }
 
+    private void showFavoriteAccountsMenu() {
+        System.out.println("Choose one action: ");
+        System.out.println("1. Show Favorite Accounts");
+        System.out.println("2. Add a new Favorite Account");
+        System.out.println("3. Remove a Favorite Account");
+        System.out.println("4. Exit Favorite Accounts Menu");
+        try {
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            switch (choice) {
+                case 1 -> showAlFavoriteAccounts();
+                case 2 -> addNewFavoriteAccount();
+                case 3 -> removeFavoriteAccount();
+                case 4 -> System.out.println("back to main menu");
+                default -> System.out.println("Choose 1-4: ");
+            }
+        } catch (Exception e) {
+            System.err.println("ERROR: " + e.getMessage());
+        }
+    }
+
+    private void removeFavoriteAccount() {
+        inputAccountPin();
+        showAlFavoriteAccounts();
+        System.out.println("Please enter an account number to be removed from your favorites:");
+        try {
+            int accountNumber = scanner.nextInt();
+            scanner.nextLine();
+            accountRepository.validateAccountNumber(accountNumber);
+            Account favoriteAccount = accountRepository.getAccount(accountNumber);
+            String userFullName = userRepository.getUserInfo(favoriteAccount.getUserId());
+            System.out.println("Are you sure you want to remove this user " + userFullName + " from your favorites? (y/n)");
+            String userInput = scanner.nextLine();
+            if (userInput.equalsIgnoreCase("N")) {
+                System.out.println("Removing favorite account aborted.");
+            } else if (userInput.equalsIgnoreCase("Y")) {
+                accountRepository.removeFavoriteAccount(userAccount, favoriteAccount);
+            } else {
+                throw new IllegalArgumentException("Invalid user's input.");
+            }
+        } catch (Exception e) {
+            System.err.println("ERROR: " + e.getMessage());
+        }
+
+    }
+
+    private void addNewFavoriteAccount() {
+        inputAccountPin();
+        System.out.println("Please enter a valid account number to be added to your favorites:");
+        try {
+            int accountNumber = scanner.nextInt();
+            scanner.nextLine();
+            accountRepository.validateAccountNumber(accountNumber);
+            Account favoriteAccount = accountRepository.getAccount(accountNumber);
+            String userFullName = userRepository.getUserInfo(favoriteAccount.getUserId());
+            System.out.println("Are you sure you want to add this user " + userFullName + " as favorite? (y/n)");
+            String userInput = scanner.nextLine();
+            if (userInput.equalsIgnoreCase("N")) {
+                System.out.println("Adding favorite account aborted.");
+            } else if (userInput.equalsIgnoreCase("Y")) {
+                accountRepository.addNewFavoriteAccount(userAccount, favoriteAccount);
+            } else {
+                throw new IllegalArgumentException("Invalid user's input.");
+            }
+        } catch (Exception e) {
+            System.err.println("ERROR: " + e.getMessage());
+        }
+    }
+
+    private void showAlFavoriteAccounts() {
+        inputAccountPin();
+        List<Integer> favoriteAccounts = accountRepository.getAllFavoriteAccount(userAccount);
+        System.out.println("all your favorite accounts IDs: ");
+        System.out.println(favoriteAccounts);
+    }
+
     private void ShowResetPasswordPrompt() {
+        inputAccountPin();
         System.out.println("Enter your old password:");
         String oldPassword = scanner.nextLine();
         System.out.println("Enter new password: ");
@@ -200,24 +280,31 @@ public class ConsoleApplication {
     }
 
     private void showTransferPrompt() {
-        inputAccountPin();
         try {
+            showAlFavoriteAccounts();
+            System.out.println("You can choose an account number from your favorite list or enter a new account number.");
             System.out.println("Enter the accountNumber you want to transfer to: ");
             int receiverAccountNumber = scanner.nextInt();
             scanner.nextLine();
             System.out.println("How much do you want to transfer? ");
             double amount = scanner.nextDouble();
             scanner.nextLine();
-            System.out.println("Do you want to transfer "
-                    + amount + "$ to "
-                    + accountRepository.getReceiverInfo(receiverAccountNumber, userRepository)
-                    + "? (y/n)");
-            String userAgreement = scanner.nextLine();
-            if (userAgreement.equalsIgnoreCase("Y")) {
+            Account receiverAccount = accountRepository.getAccount(receiverAccountNumber);
+            if (userAccount.getFavoriteAccounts().contains(receiverAccount.getAccountNumber())) {
                 accountRepository.transfer(userAccount.getAccountNumber(), receiverAccountNumber, amount);
-            } else if (userAgreement.equalsIgnoreCase("N")) {
-                System.out.println("Transfer canceled.");
-            } else throw new IllegalArgumentException("Wrong input");
+            } else {
+                String userFullName = userRepository.getUserInfo(receiverAccount.getUserId());
+                System.out.println("Do you want to transfer "
+                        + amount + "$ to "
+                        + userFullName
+                        + "? (y/n)");
+                String userAgreement = scanner.nextLine();
+                if (userAgreement.equalsIgnoreCase("Y")) {
+                    accountRepository.transfer(userAccount.getAccountNumber(), receiverAccountNumber, amount);
+                } else if (userAgreement.equalsIgnoreCase("N")) {
+                    System.out.println("Transfer canceled.");
+                } else throw new IllegalArgumentException("Wrong input");
+            }
 
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
@@ -243,33 +330,40 @@ public class ConsoleApplication {
     private void showSignupPrompt() {
         String username = null;
         String password = null;
+
+        //get username
         username = inputUsername(true);
         if (username.equals("-1")) {
             return;
         }
+
+        //get password
         password = inputPassword();
         if (password.equals("-1")) {
             return;
         }
 
-
+        //get account type
         int inputType = inputType();
         if (inputType == -1) {
             return;
         }
         AccountType type = AccountType.values()[inputType];
 
+        //get account plan
         int inputPlan = inputPlan();
         if (inputPlan == -1) {
             return;
         }
         AccountPlan accountPlan = AccountPlan.values()[inputPlan];
+
+        //get withdraw limit
         double withdrawLimit = getWithdrawLimit(accountPlan);
         if (withdrawLimit == -1) {
             return;
         }
+        //get initial deposit amount
         double initialDeposit = inputInitialDeposit(accountPlan);
-
         if (initialDeposit == -1) {
             return;
         }
@@ -422,7 +516,9 @@ public class ConsoleApplication {
         do {
             try {
                 System.out.println("To go back to the main menu please enter -1");
-                System.out.println("How much do you want to deposit to your account? ");
+                System.out.println("Your deposit limit: " + accountRepository.getDepositLimit(accountPlan));
+                System.out.println("How much do you want to deposit to your account?");
+
                 initialDeposit = scanner.nextDouble();
                 scanner.nextLine();
 
@@ -441,6 +537,7 @@ public class ConsoleApplication {
 
     private void showDepositPrompt() {
         inputAccountPin();
+        System.out.println("Your deposit limit: " + accountRepository.getDepositLimit(userAccount.getPlan()));
         System.out.println("How much do you want to deposit to your account? ");
         try {
             double amount = scanner.nextDouble();
@@ -458,6 +555,7 @@ public class ConsoleApplication {
 
     private void showWithdrawPrompt() {
         inputAccountPin();
+        System.out.println("Your withdraw limit: " + accountRepository.getWithdrawLimit(userAccount.getPlan()));
         System.out.println("How much do you want to withdraw from your account? ");
         try {
             double amount = scanner.nextDouble();

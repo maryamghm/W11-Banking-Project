@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Data
 public class AccountRepository {
@@ -39,10 +40,7 @@ public class AccountRepository {
     }
 
     public static AccountRepository getInstance(File dataSource) {
-        if (accountRepositoryInstance == null) {
-            return accountRepositoryInstance = new AccountRepository(dataSource);
-        }
-        return accountRepositoryInstance;
+        return Objects.requireNonNullElseGet(accountRepositoryInstance, () -> accountRepositoryInstance = new AccountRepository(dataSource));
     }
 
     private void populateAccounts() {
@@ -101,13 +99,7 @@ public class AccountRepository {
 
 
     public void validateNormalWithdrawLimit(double withdrawLimit) {
-        if (withdrawLimit >= WITHDRAW_LIMIT_NORMAL) {
-            throw new IllegalArgumentException("Withdraw limit for a normal user can be maximum " + WITHDRAW_LIMIT_NORMAL + "$.");
-        }
-    }
-
-    public void validateWithdrawLimit(double withdrawLimit) {
-        if (withdrawLimit >= WITHDRAW_LIMIT_NORMAL) {
+        if (withdrawLimit > WITHDRAW_LIMIT_NORMAL) {
             throw new IllegalArgumentException("Withdraw limit for a normal user can be maximum " + WITHDRAW_LIMIT_NORMAL + "$.");
         }
     }
@@ -155,6 +147,9 @@ public class AccountRepository {
     }
 
     public void validateDepositLimit(double amount, AccountPlan accountPlan) {
+        if (amount == 0.0) {
+            throw new IllegalArgumentException("Deposit amount cannot be zero.");
+        }
         switch (accountPlan) {
             case PLATINUM -> {
                 if (amount > DEPOSIT_LIMIT_PLATINUM) {
@@ -212,6 +207,7 @@ public class AccountRepository {
                 .addColumn("depositLimit")
                 .addColumn("isActive")
                 .addColumn("overdraftCounter")
+                .addColumn("favoriteAccounts")
                 .setUseHeader(true)
                 .build();
         try {
@@ -219,14 +215,6 @@ public class AccountRepository {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public String getReceiverInfo(int receiverAccountNumber, UserRepository userRepository) {
-        if (!accountNumberMap.containsKey(receiverAccountNumber)) {
-            throw new IllegalArgumentException("Invalid receiver account Number");
-        }
-        int userId = accountNumberMap.get(receiverAccountNumber).getUserId();
-        return userRepository.getUserInfo(userId);
     }
 
     public void transfer(int senderAccountNumber, int receiverAccountNumber, double amount) {
@@ -245,9 +233,7 @@ public class AccountRepository {
     }
 
     public void deactivateAccount(Account account) {
-        if (!accountNumberMap.containsKey(account.getAccountNumber())) {
-            throw new IllegalArgumentException("Invalid account number.");
-        }
+        validateAccountNumber(account.getAccountNumber());
         account.setActive(false);
     }
 
@@ -259,5 +245,34 @@ public class AccountRepository {
         if (!pin.matches("^\\d{4}$")) {
             throw new InvalidPinException("Invalid pin format! only 4 digit.");
         }
+    }
+
+    public List<Integer> getAllFavoriteAccount(Account account) {
+        validateAccountNumber(account.getAccountNumber());
+        return accountNumberMap.get(account.getAccountNumber()).getFavoriteAccounts();
+    }
+
+    public void addNewFavoriteAccount(Account account, Account favoriteAccount) {
+        validateAccountNumber(account.getAccountNumber());
+        validateAccountNumber(favoriteAccount.getAccountNumber());
+        accountNumberMap.get(account.getAccountNumber()).getFavoriteAccounts().add(favoriteAccount.getAccountNumber());
+    }
+
+    public void removeFavoriteAccount(Account account, Account favoriteAccount) {
+        validateAccountNumber(account.getAccountNumber());
+        validateAccountNumber(favoriteAccount.getAccountNumber());
+        accountNumberMap.get(account.getAccountNumber()).getFavoriteAccounts().remove(favoriteAccount.getAccountNumber());
+    }
+
+    public void validateAccountNumber(int accountNumber) {
+        if (!accountNumberMap.containsKey(accountNumber)) {
+            throw new IllegalArgumentException("Invalid account number.");
+        }
+    }
+
+    public Account getAccount(int accountNumber) {
+        validateAccountNumber(accountNumber);
+        return accountNumberMap.get(accountNumber);
+
     }
 }

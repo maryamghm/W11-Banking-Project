@@ -7,6 +7,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Data;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -49,10 +52,15 @@ public abstract class Account {
     @JsonProperty("overdraftCounter")
     private int overdraftCounter;
 
+    @JsonProperty("favoriteAccounts")
+    private List<Integer> favoriteAccounts;
+
+
     @JsonIgnore
     private static final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public Account() {
+        this.favoriteAccounts = new ArrayList<>();
     }
 
     public abstract void withdraw(double amount);
@@ -78,4 +86,6 @@ public abstract class Account {
             throw new IllegalArgumentException("Pin doesn't match");
         }
     }
+
+
 }
