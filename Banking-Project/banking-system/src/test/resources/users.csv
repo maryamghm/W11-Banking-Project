@@ -1,1 +1,1 @@
-id,username,password,type,isActive
+id,username,password,firstName,lastName,type,isActive

@@ -35,7 +35,7 @@ public class AccountRepositoryTest {
 
     @Test
     public void addAccount() {
-        User user = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD);
+        User user = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD, FIRSTNAME, LASTNAME);
         AccountType type = AccountType.CHECKING_ACCOUNT;
         AccountPlan plan = AccountPlan.NORMAL;
         double withdrawLimit = 100.0;
@@ -56,7 +56,7 @@ public class AccountRepositoryTest {
 
     @Test
     public void showBalanceTest() {
-        User user = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD);
+        User user = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD, FIRSTNAME, LASTNAME);
         AccountType type = AccountType.CHECKING_ACCOUNT;
         AccountPlan plan = AccountPlan.NORMAL;
         double withdrawLimit = 100.0;
@@ -78,7 +78,7 @@ public class AccountRepositoryTest {
 
     @Test
     public void depositTest() {
-        User user = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD);
+        User user = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD, FIRSTNAME, LASTNAME);
         AccountType type = AccountType.CHECKING_ACCOUNT;
         AccountPlan plan = AccountPlan.NORMAL;
         double withdrawLimit = 100.0;
@@ -93,7 +93,7 @@ public class AccountRepositoryTest {
 
     @Test
     public void withdrawTest() {
-        User user = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD);
+        User user = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD, FIRSTNAME, LASTNAME);
         AccountType type = AccountType.CHECKING_ACCOUNT;
         AccountPlan plan = AccountPlan.NORMAL;
         double withdrawLimit = 100.0;
@@ -109,7 +109,7 @@ public class AccountRepositoryTest {
 
     @Test
     public void overdraftCheckingAccountTest() {
-        User user = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD);
+        User user = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD, FIRSTNAME, LASTNAME);
         AccountType type = AccountType.CHECKING_ACCOUNT;
         AccountPlan plan = AccountPlan.NORMAL;
         double withdrawLimit = 100.0;
@@ -136,7 +136,7 @@ public class AccountRepositoryTest {
 
     @Test
     public void overdraftSavingsAccountTest() {
-        User user = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD);
+        User user = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD, FIRSTNAME, LASTNAME);
         AccountType type = AccountType.SAVINGS_ACCOUNT;
         AccountPlan plan = AccountPlan.NORMAL;
         double withdrawLimit = 100.0;
@@ -152,7 +152,7 @@ public class AccountRepositoryTest {
 
     @Test
     public void transferTest() {
-        User user = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD);
+        User user = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD, FIRSTNAME, LASTNAME);
         AccountType type = AccountType.SAVINGS_ACCOUNT;
         AccountPlan plan = AccountPlan.NORMAL;
         double withdrawLimit = 170.0;
@@ -161,7 +161,7 @@ public class AccountRepositoryTest {
 
         Account account1 = accountRepository.addNewAccount(user.getId(), pin, type, plan, withdrawLimit, balance1);
 
-        User user2 = userRepository.signUp(SIGNUP_USERNAME2, PASSWORD);
+        User user2 = userRepository.signUp(SIGNUP_USERNAME2, PASSWORD, FIRSTNAME, LASTNAME);
         type = AccountType.CHECKING_ACCOUNT;
         plan = AccountPlan.SILVER;
         withdrawLimit = accountRepository.getWithdrawLimit(plan);
@@ -181,7 +181,7 @@ public class AccountRepositoryTest {
 
     @Test
     public void deactivateAccountTest() {
-        User user = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD);
+        User user = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD, FIRSTNAME, LASTNAME);
         AccountType type = AccountType.SAVINGS_ACCOUNT;
         AccountPlan plan = AccountPlan.NORMAL;
         double withdrawLimit = 170.0;

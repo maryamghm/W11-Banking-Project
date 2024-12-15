@@ -10,11 +10,12 @@ import org.example.exception.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class UserRepository {
-    private final Map<String, User> users = new HashMap<>();
+    private final Map<String, User> userNameToUserMap = new HashMap<>();
+    private final Map<Integer, User> userIdToUserMap = new HashMap<>();
     private int idCounter;
     private final File dataSource;
     private final int MAX_LOGIN_ATTEMPTS = 3;
@@ -27,14 +28,11 @@ public class UserRepository {
     }
 
     public static UserRepository getInstance(File datasource) {
-        if (userRepositoryInstance == null) {
-            return userRepositoryInstance = new UserRepository(datasource);
-        }
-        return userRepositoryInstance;
+        return Objects.requireNonNullElseGet(userRepositoryInstance, () -> userRepositoryInstance = new UserRepository(datasource));
     }
 
     public int getSize() {
-        return users.size();
+        return userNameToUserMap.size();
     }
 
     public void populateUsersList() {
@@ -45,17 +43,13 @@ public class UserRepository {
         ObjectReader reader = csvMapper.readerFor(User.class).with(schema);
 
         try {
-            List<Object> userList = reader.readValues(dataSource).readAll();
-            for (Object obj : userList) {
-                if (obj instanceof User) {
-                    users.put(((User) obj).getUsername(), (User) obj);
-                }
-            }
+            reader.readValues(dataSource).readAll().stream().map(o -> (User) o)
+                    .forEach(user -> {
+                        userNameToUserMap.put(user.getUsername(), user);
+                        userIdToUserMap.put(user.getId(), user);
+                    });
 
-            idCounter = users.values().stream()
-                    .map(User::getId)
-                    .max(Integer::compareTo)
-                    .orElse(0);
+            idCounter = userIdToUserMap.keySet().stream().max(Integer::compareTo).orElse(0);
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -68,35 +62,39 @@ public class UserRepository {
                 .addColumn("id")
                 .addColumn("username")
                 .addColumn("password")
+                .addColumn("firstName")
+                .addColumn("lastName")
                 .addColumn("type")
                 .addColumn("isActive")
                 .setUseHeader(true)
                 .build();
         try {
-            csvMapper.writer(schema).writeValue(dataSource, users.values());
+            csvMapper.writer(schema).writeValue(dataSource, userNameToUserMap.values());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public User signUp(String username, String password) {
-        User user = createNewUser(username, password);
-        users.put(user.getUsername(), user);
+    public User signUp(String username, String password, String firstName, String lastName) {
+        User user = createNewUser(username, password, firstName, lastName);
+        userNameToUserMap.put(user.getUsername(), user);
         System.out.println("Welcome " + username);
         return user;
     }
 
-    public User createNewUser(String username, String password) {
+    public User createNewUser(String username, String password, String firstName, String lastName) {
         validateUsername(username, true);
         validatePassword(password);
-        User user = new User(++idCounter, username, password);
+        validateFirstName(firstName);
+        validateLastName(lastName);
+        User user = new User(++idCounter, username, password, firstName, lastName);
         user.setType(UserType.CUSTOMER);
         user.setActive(true);
         return user;
     }
 
     public void validateUsername(String username, boolean isNewUser) {
-        if (isNewUser && users.containsKey(username)) {
+        if (isNewUser && userNameToUserMap.containsKey(username)) {
             throw new InvalidPasswordException("Username is already exists");
         }
         if (username == null || username.isBlank() || !username.matches("^[^A-Z]*$")) {
@@ -110,9 +108,21 @@ public class UserRepository {
     }
 
 
+    public void validateFirstName(String firstName) {
+        if (firstName == null || firstName.isBlank()) {
+            throw new InvalidPasswordException("First Name cannot be blank.");
+        }
+    }
+
+    public void validateLastName(String lastName) {
+        if (lastName == null || lastName.isBlank()) {
+            throw new InvalidPasswordException("Last Name cannot be blank.");
+        }
+    }
+
     public User login(String username, String password) {
-        if (users.containsKey(username)) {
-            User user = users.get(username);
+        if (userNameToUserMap.containsKey(username)) {
+            User user = userNameToUserMap.get(username);
             if (!user.isActive()) {
                 throw new LoginFailedException("This user is already deactivated!");
             }
@@ -130,16 +140,16 @@ public class UserRepository {
     }
 
     public void logout(String username) {
-        if (!users.containsKey(username)) {
+        if (!userNameToUserMap.containsKey(username)) {
             throw new LogoutFailedException("Invalid username.");
         }
     }
 
     public void resetPassword(String username, String oldPassword, String newPassword) {
-        if (!users.containsKey(username)) {
+        if (!userNameToUserMap.containsKey(username)) {
             throw new IllegalArgumentException("User not found.");
         }
-        User user = users.get(username);
+        User user = userNameToUserMap.get(username);
         if (!user.matchPassword(oldPassword)) {
             throw new IllegalArgumentException("Old password doesn't match!");
         }
@@ -147,11 +157,14 @@ public class UserRepository {
     }
 
     public String getUserInfo(int userId) {
-        return "name";
+        if (!userIdToUserMap.containsKey(userId)) {
+            throw new IllegalArgumentException("UserId not found.");
+        }
+        return userIdToUserMap.get(userId).getFirstName() + " " + userIdToUserMap.get(userId).getLastName();
     }
 
     public void deactivateUser(User user) {
-        if (!users.containsKey(user.getUsername())) {
+        if (!userNameToUserMap.containsKey(user.getUsername())) {
             throw new IllegalArgumentException("Invalid User.");
         }
         user.setActive(false);

@@ -13,8 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.net.URI;
 
-import static org.example.TestFixtures.PASSWORD;
-import static org.example.TestFixtures.SIGNUP_USERNAME1;
+import static org.example.TestFixtures.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserRepositoryTest {
@@ -40,7 +39,7 @@ class UserRepositoryTest {
 
     @Test
     public void testSignup() {
-        User newUser = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD);
+        User newUser = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD, FIRSTNAME, LASTNAME);
 
         assertNotNull(newUser);
         assertNotNull(newUser.getId());
@@ -54,21 +53,21 @@ class UserRepositoryTest {
 
     @Test
     public void testDoubleSignup() {
-        User newUser = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD);
+        User newUser = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD, FIRSTNAME, LASTNAME);
         assertNotNull(newUser);
 
-        assertThrows(SignupFailedException.class, () -> userRepository.signUp(SIGNUP_USERNAME1, PASSWORD));
+        assertThrows(SignupFailedException.class, () -> userRepository.signUp(SIGNUP_USERNAME1, PASSWORD, FIRSTNAME, LASTNAME));
     }
 
     @Test
     public void testSignupWithUppercaseUsername() {
-        assertThrows(SignupFailedException.class, () -> userRepository.signUp(SIGNUP_USERNAME1.toUpperCase(), PASSWORD));
+        assertThrows(SignupFailedException.class, () -> userRepository.signUp(SIGNUP_USERNAME1.toUpperCase(), PASSWORD, FIRSTNAME, LASTNAME));
     }
 
     @Test
     public void testLoginWithWrongPassword() {
 
-        User newUser = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD);
+        User newUser = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD, FIRSTNAME, LASTNAME);
 
         String wrongPassword = PASSWORD.toLowerCase();
         assertThrows(LoginFailedException.class, () -> userRepository.login(SIGNUP_USERNAME1, wrongPassword));
@@ -76,7 +75,7 @@ class UserRepositoryTest {
 
     @Test
     public void testLoginLimit() {
-        User newUser = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD);
+        User newUser = userRepository.signUp(SIGNUP_USERNAME1, PASSWORD, FIRSTNAME, LASTNAME);
 
         String wrongPassword = PASSWORD.toLowerCase();
         for (int i = 0; i < 3; i++) {
@@ -88,7 +87,7 @@ class UserRepositoryTest {
 
     @Test
     public void testResetPassword() {
-        userRepository.signUp(SIGNUP_USERNAME1, PASSWORD);
+        userRepository.signUp(SIGNUP_USERNAME1, PASSWORD, FIRSTNAME, LASTNAME);
         User logginUser = userRepository.login(SIGNUP_USERNAME1, PASSWORD);
         String newPassword = PASSWORD + "5";
         userRepository.resetPassword(SIGNUP_USERNAME1, PASSWORD, newPassword);
@@ -98,7 +97,7 @@ class UserRepositoryTest {
 
     @Test
     public void testLoginDeactivatedUser() {
-        userRepository.signUp(SIGNUP_USERNAME1, PASSWORD);
+        userRepository.signUp(SIGNUP_USERNAME1, PASSWORD, FIRSTNAME, LASTNAME);
         User logginUser = userRepository.login(SIGNUP_USERNAME1, PASSWORD);
 
         userRepository.deactivateUser(logginUser);

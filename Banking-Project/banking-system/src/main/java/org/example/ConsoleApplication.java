@@ -29,7 +29,7 @@ public class ConsoleApplication {
         accountRepository = AccountRepository.getInstance(new File("accounts.csv"));
         transactionRepository = TransactionRepository.getInstance(new File("transactions.csv"));
         boolean isRunning = true;
-        System.out.println("Welcome");
+        System.out.println("Welcome to Banking Management System!");
         while (isRunning) {
             if (loggedInUser == null) {
                 isRunning = showNoLoginMenu();
@@ -65,7 +65,7 @@ public class ConsoleApplication {
                     exitSystem();
                     return false;
                 }
-                default -> System.out.println("Choose 1-3: ");
+                default -> System.out.println("Choose an action between 1-3: ");
             }
         } catch (Exception e) {
             System.err.println("ERROR: " + e.getMessage());
@@ -104,7 +104,7 @@ public class ConsoleApplication {
                 case 7 -> ShowResetPasswordPrompt();
                 case 8 -> showDeactivateAccountPrompt();
                 case 9 -> logOut();
-                default -> System.out.println("Choose 1-9: ");
+                default -> System.out.println("Choose an action between 1-9: ");
             }
         } catch (Exception e) {
             System.err.println("ERROR: " + e.getMessage());
@@ -125,7 +125,7 @@ public class ConsoleApplication {
                 case 1 -> showAlFavoriteAccounts();
                 case 2 -> addNewFavoriteAccount();
                 case 3 -> removeFavoriteAccount();
-                case 4 -> System.out.println("back to main menu");
+                case 4 -> System.out.println("backing to main menu ..");
                 default -> System.out.println("Choose 1-4: ");
             }
         } catch (Exception e) {
@@ -136,14 +136,14 @@ public class ConsoleApplication {
     private void removeFavoriteAccount() {
         inputAccountPin();
         showAlFavoriteAccounts();
-        System.out.println("Please enter an account number to be removed from your favorites:");
+        System.out.println("Please enter an account number to be removed from your favorite account list:");
         try {
             int accountNumber = scanner.nextInt();
             scanner.nextLine();
             accountRepository.validateAccountNumber(accountNumber);
             Account favoriteAccount = accountRepository.getAccount(accountNumber);
             String userFullName = userRepository.getUserInfo(favoriteAccount.getUserId());
-            System.out.println("Are you sure you want to remove this user " + userFullName + " from your favorites? (y/n)");
+            System.out.println("Are you sure you want to remove " + userFullName + " from your favorites? (y/n)");
             String userInput = scanner.nextLine();
             if (userInput.equalsIgnoreCase("N")) {
                 System.out.println("Removing favorite account aborted.");
@@ -160,14 +160,14 @@ public class ConsoleApplication {
 
     private void addNewFavoriteAccount() {
         inputAccountPin();
-        System.out.println("Please enter a valid account number to be added to your favorites:");
+        System.out.println("Please enter a valid account number to be added to your favorite account list:");
         try {
             int accountNumber = scanner.nextInt();
             scanner.nextLine();
             accountRepository.validateAccountNumber(accountNumber);
             Account favoriteAccount = accountRepository.getAccount(accountNumber);
             String userFullName = userRepository.getUserInfo(favoriteAccount.getUserId());
-            System.out.println("Are you sure you want to add this user " + userFullName + " as favorite? (y/n)");
+            System.out.println("Are you sure you want to add " + userFullName + " as a favorite account? (y/n)");
             String userInput = scanner.nextLine();
             if (userInput.equalsIgnoreCase("N")) {
                 System.out.println("Adding favorite account aborted.");
@@ -184,7 +184,11 @@ public class ConsoleApplication {
     private void showAlFavoriteAccounts() {
         inputAccountPin();
         List<Integer> favoriteAccounts = accountRepository.getAllFavoriteAccount(userAccount);
-        System.out.println("all your favorite accounts IDs: ");
+        if (favoriteAccounts.isEmpty()) {
+            System.out.println("You have no favorite account list yet.");
+            return;
+        }
+        System.out.println("Your favorite accounts IDs: ");
         System.out.println(favoriteAccounts);
     }
 
@@ -199,7 +203,7 @@ public class ConsoleApplication {
 
     private void showTransactionHistoryPrompt() {
         inputAccountPin();
-        System.out.println("Choose:");
+        System.out.println("Choose an action:");
         System.out.println("1. Show All Transactions");
         System.out.println("2. Show Transaction History within a specified date range");
         try {
@@ -303,7 +307,7 @@ public class ConsoleApplication {
                     accountRepository.transfer(userAccount.getAccountNumber(), receiverAccountNumber, amount);
                 } else if (userAgreement.equalsIgnoreCase("N")) {
                     System.out.println("Transfer canceled.");
-                } else throw new IllegalArgumentException("Wrong input");
+                } else throw new IllegalArgumentException("Invalid user input.");
             }
 
         } catch (Exception e) {
@@ -328,18 +332,27 @@ public class ConsoleApplication {
     }
 
     private void showSignupPrompt() {
-        String username = null;
-        String password = null;
-
         //get username
-        username = inputUsername(true);
+        String username = inputUsername(true);
         if (username.equals("-1")) {
             return;
         }
 
         //get password
-        password = inputPassword();
+        String password = inputPassword();
         if (password.equals("-1")) {
+            return;
+        }
+
+        //get firstname
+        String firstName = inputFirstName();
+        if (firstName.equals("-1")) {
+            return;
+        }
+
+        //get lastname
+        String lastName = inputLastName();
+        if (lastName.equals("-1")) {
             return;
         }
 
@@ -373,10 +386,48 @@ public class ConsoleApplication {
             return;
         }
 
-        User user = userRepository.signUp(username, password);
+        User user = userRepository.signUp(username, password, firstName, lastName);
 
         userAccount = accountRepository.addNewAccount(user.getId(), pin, type, accountPlan, withdrawLimit, initialDeposit);
         showLoginPrompt();
+    }
+
+    private String inputFirstName() {
+        String firstName;
+        do {
+            try {
+                System.out.println("To go back to the main menu please enter -1");
+                System.out.println("Please enter your firstname: ");
+                firstName = scanner.nextLine();
+                if (Objects.equals(firstName, "-1")) {
+                    break;
+                }
+                userRepository.validateFirstName(firstName);
+                break;
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        } while (true);
+        return firstName;
+    }
+
+    private String inputLastName() {
+        String lastName;
+        do {
+            try {
+                System.out.println("To go back to the main menu please enter -1");
+                System.out.println("Please enter your lastname: ");
+                lastName = scanner.nextLine();
+                if (Objects.equals(lastName, "-1")) {
+                    break;
+                }
+                userRepository.validateLastName(lastName);
+                break;
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        } while (true);
+        return lastName;
     }
 
     private String inputPassword() {

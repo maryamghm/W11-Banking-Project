@@ -52,17 +52,13 @@ public class AccountRepository {
         ObjectReader reader = csvMapper.readerFor(Account.class).with(schema);
 
         try {
-            List<Object> objects = reader.readValues(dataSource).readAll();
-            for (Object obj : objects) {
-                if (obj instanceof Account) {
-                    userAccountMap.put(((Account) obj).getUserId(), (Account) obj);
-                    accountNumberMap.put(((Account) obj).getAccountNumber(), (Account) obj);
-                }
-            }
-            userAccountMap.values().stream()
-                    .map(Account::getAccountNumber)
-                    .max(Integer::compareTo)
-                    .orElse(0);
+            reader.readValues(dataSource).readAll().stream().map(o -> (Account) o)
+                    .forEach(account -> {
+                        userAccountMap.put(account.getUserId(), account);
+                        accountNumberMap.put(account.getAccountNumber(), account);
+                    });
+
+            accountNumberCounter = accountNumberMap.keySet().stream().max(Integer::compareTo).orElse(0);
 
         } catch (IOException e) {
             throw new RuntimeException(e);

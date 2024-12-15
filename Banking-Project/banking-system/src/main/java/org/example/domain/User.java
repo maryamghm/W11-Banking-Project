@@ -16,6 +16,12 @@ public class User {
     @JsonProperty("password")
     private String password;
 
+    @JsonProperty("firstName")
+    private String firstName;
+
+    @JsonProperty("lastName")
+    private String lastName;
+
     @JsonProperty("type")
     private UserType type;
 
@@ -31,9 +37,11 @@ public class User {
     public User() {
     }
 
-    public User(int id, String username, String password) {
+    public User(int id, String username, String password, String firstName, String lastName) {
         this.id = id;
         this.username = username;
+        this.firstName = firstName;
+        this.lastName = lastName;
         setRawPassword(password);
     }
 
@@ -46,6 +54,18 @@ public class User {
 
     public boolean matchPassword(String password) {
         return (PasswordHashing.hashPasswordSHA1(password).equals(this.password));
+    }
+
+    public void SetName(String firstName, String lastName) {
+        if (firstName == null || firstName.isBlank()) {
+            throw new IllegalArgumentException("First name cannot be blank.");
+        }
+
+        if (lastName == null || lastName.isBlank()) {
+            throw new IllegalArgumentException("Last name cannot be blank.");
+        }
+        this.firstName = firstName;
+        this.lastName = lastName;
     }
 
     public static boolean isValidPassword(String password) {
