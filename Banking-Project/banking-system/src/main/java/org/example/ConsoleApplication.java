@@ -7,6 +7,7 @@ import org.example.exception.InvalidUserNameException;
 import org.example.repository.AccountRepository;
 import org.example.repository.TransactionRepository;
 import org.example.repository.UserRepository;
+import org.example.utils.Colors;
 
 import java.io.File;
 import java.time.LocalDate;
@@ -29,7 +30,7 @@ public class ConsoleApplication {
         accountRepository = AccountRepository.getInstance(new File("accounts.csv"));
         transactionRepository = TransactionRepository.getInstance(new File("transactions.csv"));
         boolean isRunning = true;
-        System.out.println("Welcome to Banking Management System!");
+        System.out.println(Colors.colorize("Welcome to Banking Management System!", Colors.ANSI_BOLD_BLUE));
         while (isRunning) {
             if (loggedInUser == null) {
                 isRunning = showNoLoginMenu();
@@ -47,10 +48,10 @@ public class ConsoleApplication {
     }
 
     private boolean showNoLoginMenu() {
-        System.out.println("Menu:");
-        System.out.println("1. SignUp");
-        System.out.println("2. Login");
-        System.out.println("3. Exit");
+        System.out.println(Colors.colorize("Menu:", Colors.ANSI_BOLD_GREEN));
+        System.out.println(Colors.colorize("1. SignUp", Colors.ANSI_BOLD_GREEN));
+        System.out.println(Colors.colorize("2. Login", Colors.ANSI_BOLD_GREEN));
+        System.out.println(Colors.colorize("3. Exit", Colors.ANSI_BOLD_GREEN));
         try {
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -74,23 +75,23 @@ public class ConsoleApplication {
     }
 
     private void exitSystem() {
-        System.out.println("Goodbye!");
+        System.out.println(Colors.colorize("Goodbye!", Colors.ANSI_BOLD_BLUE));
         userRepository.writeUsersInFile();
         accountRepository.writeAccountsIntoFile();
         transactionRepository.saveTransactions();
     }
 
     private boolean showCustomerMenu() {
-        System.out.println("Menu For Customers: ");
-        System.out.println("1. Show Balance");
-        System.out.println("2. Deposit");
-        System.out.println("3. Withdraw");
-        System.out.println("4. Transfer");
-        System.out.println("5. Favorite Account");
-        System.out.println("6. Show Transactions History");
-        System.out.println("7. Reset Password");
-        System.out.println("8. Deactivate account");
-        System.out.println("9. Logout");
+        System.out.println(Colors.colorize("Menu For Customers: ", Colors.ANSI_BOLD_PURPLE));
+        System.out.println(Colors.colorize("1. Show Balance", Colors.ANSI_BOLD_PURPLE));
+        System.out.println(Colors.colorize("2. Deposit", Colors.ANSI_BOLD_PURPLE));
+        System.out.println(Colors.colorize("3. Withdraw", Colors.ANSI_BOLD_PURPLE));
+        System.out.println(Colors.colorize("4. Transfer", Colors.ANSI_BOLD_PURPLE));
+        System.out.println(Colors.colorize("5. Favorite Account", Colors.ANSI_BOLD_PURPLE));
+        System.out.println(Colors.colorize("6. Show Transactions History", Colors.ANSI_BOLD_PURPLE));
+        System.out.println(Colors.colorize("7. Reset Password", Colors.ANSI_BOLD_PURPLE));
+        System.out.println(Colors.colorize("8. Deactivate account", Colors.ANSI_BOLD_PURPLE));
+        System.out.println(Colors.colorize("9. Logout", Colors.ANSI_BOLD_PURPLE));
         try {
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -113,11 +114,11 @@ public class ConsoleApplication {
     }
 
     private void showFavoriteAccountsMenu() {
-        System.out.println("Choose one action: ");
-        System.out.println("1. Show Favorite Accounts");
-        System.out.println("2. Add a new Favorite Account");
-        System.out.println("3. Remove a Favorite Account");
-        System.out.println("4. Exit Favorite Accounts Menu");
+        System.out.println(Colors.colorize("Choose one action: ", Colors.ANSI_BOLD_CYAN));
+        System.out.println(Colors.colorize("1. Show Favorite Accounts", Colors.ANSI_BOLD_CYAN));
+        System.out.println(Colors.colorize("2. Add a new Favorite Account", Colors.ANSI_BOLD_CYAN));
+        System.out.println(Colors.colorize("3. Remove a Favorite Account", Colors.ANSI_BOLD_CYAN));
+        System.out.println(Colors.colorize("4. Exit Favorite Accounts Menu", Colors.ANSI_BOLD_CYAN));
         try {
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -203,9 +204,9 @@ public class ConsoleApplication {
 
     private void showTransactionHistoryPrompt() {
         inputAccountPin();
-        System.out.println("Choose an action:");
-        System.out.println("1. Show All Transactions");
-        System.out.println("2. Show Transaction History within a specified date range");
+        System.out.println(Colors.colorize("Choose an action:", Colors.ANSI_BOLD_CYAN));
+        System.out.println(Colors.colorize("1. Show All Transactions", Colors.ANSI_BOLD_CYAN));
+        System.out.println(Colors.colorize("2. Show Transaction History within a specified date range", Colors.ANSI_BOLD_CYAN));
         try {
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -296,6 +297,7 @@ public class ConsoleApplication {
             Account receiverAccount = accountRepository.getAccount(receiverAccountNumber);
             if (userAccount.getFavoriteAccounts().contains(receiverAccount.getAccountNumber())) {
                 accountRepository.transfer(userAccount.getAccountNumber(), receiverAccountNumber, amount);
+                System.out.println("Transfer succeed.");
             } else {
                 String userFullName = userRepository.getUserInfo(receiverAccount.getUserId());
                 System.out.println("Do you want to transfer "
@@ -305,6 +307,7 @@ public class ConsoleApplication {
                 String userAgreement = scanner.nextLine();
                 if (userAgreement.equalsIgnoreCase("Y")) {
                     accountRepository.transfer(userAccount.getAccountNumber(), receiverAccountNumber, amount);
+                    System.out.println("Transfer succeed.");
                 } else if (userAgreement.equalsIgnoreCase("N")) {
                     System.out.println("Transfer canceled.");
                 } else throw new IllegalArgumentException("Invalid user input.");
@@ -322,9 +325,15 @@ public class ConsoleApplication {
     private void showLoginPrompt() {
         System.out.println("Welcome! please log into system:");
         String username = inputUsername(false);
-        System.out.println("Enter yor password:");
+        if (username.equals("-1")) {
+            return;
+        }
+        System.out.println(Colors.colorize("To go back to the main menu please enter -1", Colors.ANSI_BOLD_YELLOW));
+        System.out.println("Please enter your password: ");
         String password = scanner.nextLine();
-
+        if (Objects.equals(password, "-1")) {
+            return;
+        }
         loggedInUser = userRepository.login(username, password);
         if (loggedInUser.getType() == UserType.CUSTOMER) {
             userAccount = accountRepository.getUserAccount(loggedInUser.getId());
@@ -396,7 +405,7 @@ public class ConsoleApplication {
         String firstName;
         do {
             try {
-                System.out.println("To go back to the main menu please enter -1");
+                System.out.println(Colors.colorize("To go back to the main menu please enter -1", Colors.ANSI_BOLD_YELLOW));
                 System.out.println("Please enter your firstname: ");
                 firstName = scanner.nextLine();
                 if (Objects.equals(firstName, "-1")) {
@@ -415,7 +424,7 @@ public class ConsoleApplication {
         String lastName;
         do {
             try {
-                System.out.println("To go back to the main menu please enter -1");
+                System.out.println(Colors.colorize("To go back to the main menu please enter -1", Colors.ANSI_BOLD_YELLOW));
                 System.out.println("Please enter your lastname: ");
                 lastName = scanner.nextLine();
                 if (Objects.equals(lastName, "-1")) {
@@ -434,7 +443,7 @@ public class ConsoleApplication {
         String password;
         do {
             try {
-                System.out.println("To go back to the main menu please enter -1");
+                System.out.println(Colors.colorize("To go back to the main menu please enter -1", Colors.ANSI_BOLD_YELLOW));
                 System.out.println("Please enter your password: ");
                 password = scanner.nextLine();
                 if (Objects.equals(password, "-1")) {
@@ -453,7 +462,7 @@ public class ConsoleApplication {
         String username;
         do {
             try {
-                System.out.println("To go back to the main menu please enter -1");
+                System.out.println(Colors.colorize("To go back to the main menu please enter -1", Colors.ANSI_BOLD_YELLOW));
                 System.out.println("Please enter your username: ");
                 username = scanner.nextLine();
                 if (Objects.equals(username, "-1")) {
@@ -472,7 +481,7 @@ public class ConsoleApplication {
         String pin;
         do {
             try {
-                System.out.println("To go back to the main menu please enter -1");
+                System.out.println(Colors.colorize("To go back to the main menu please enter -1", Colors.ANSI_BOLD_YELLOW));
                 System.out.println("Set your account pin (4 digits): ");
                 pin = scanner.nextLine();
                 if (Objects.equals(pin, "-1")) {
@@ -493,7 +502,7 @@ public class ConsoleApplication {
         if (plan == AccountPlan.NORMAL) {
             do {
                 try {
-                    System.out.println("To go back to the main menu please enter -1");
+                    System.out.println(Colors.colorize("To go back to the main menu please enter -1", Colors.ANSI_BOLD_YELLOW));
                     System.out.println("Enter your maximum withdraw limit: ");
                     withdrawLimit = scanner.nextDouble();
                     scanner.nextLine();
@@ -516,7 +525,7 @@ public class ConsoleApplication {
         int accountPlan;
         do {
             try {
-                System.out.println("To go back to the main menu please enter -1");
+                System.out.println(Colors.colorize("To go back to the main menu please enter -1", Colors.ANSI_BOLD_YELLOW));
                 System.out.println("What kind of Plan do you want? "
                     + String.join(", ", Arrays.stream(AccountPlan.values())
                     .map(plan -> plan.ordinal() + ":" + plan.name()).toList()));
@@ -541,7 +550,7 @@ public class ConsoleApplication {
         int type;
         do {
             try {
-                System.out.println("To go back to the main menu please enter -1");
+                System.out.println(Colors.colorize("To go back to the main menu please enter -1", Colors.ANSI_BOLD_YELLOW));
                 System.out.println("What kind of Account do you want? "
                     + String.join(", ", Arrays.stream(AccountType.values())
                     .map(plan -> plan.ordinal() + ":" + plan.name()).toList()));
@@ -566,8 +575,8 @@ public class ConsoleApplication {
         double initialDeposit;
         do {
             try {
-                System.out.println("To go back to the main menu please enter -1");
-                System.out.println("Your deposit limit: " + accountRepository.getDepositLimit(accountPlan));
+                System.out.println(Colors.colorize("To go back to the main menu please enter -1", Colors.ANSI_BOLD_YELLOW));
+                System.out.println(Colors.colorize("Your deposit limit: " + accountRepository.getDepositLimit(accountPlan), Colors.ANSI_CYAN));
                 System.out.println("How much do you want to deposit to your account?");
 
                 initialDeposit = scanner.nextDouble();
@@ -588,7 +597,7 @@ public class ConsoleApplication {
 
     private void showDepositPrompt() {
         inputAccountPin();
-        System.out.println("Your deposit limit: " + accountRepository.getDepositLimit(userAccount.getPlan()));
+        System.out.println(Colors.colorize("Your deposit limit: " + accountRepository.getDepositLimit(userAccount.getPlan()), Colors.ANSI_CYAN));
         System.out.println("How much do you want to deposit to your account? ");
         try {
             double amount = scanner.nextDouble();
@@ -606,7 +615,7 @@ public class ConsoleApplication {
 
     private void showWithdrawPrompt() {
         inputAccountPin();
-        System.out.println("Your withdraw limit: " + accountRepository.getWithdrawLimit(userAccount.getPlan()));
+        System.out.println(Colors.colorize("Your withdraw limit: " + accountRepository.getWithdrawLimit(userAccount.getPlan()), Colors.ANSI_CYAN));
         System.out.println("How much do you want to withdraw from your account? ");
         try {
             double amount = scanner.nextDouble();
