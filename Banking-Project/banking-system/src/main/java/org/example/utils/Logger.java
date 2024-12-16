@@ -34,6 +34,6 @@ public class Logger {
     }
 
     public static String resetColoredMessage(String message) {
-        return Colors.ANSI_BOLD_WHITE + message;
+        return Colors.ANSI_RESET + message;
     }
 }
