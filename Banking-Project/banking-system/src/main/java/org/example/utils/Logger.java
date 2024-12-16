@@ -30,6 +30,10 @@ public class Logger {
     }
 
     public static String coloredData(String message) {
-        return Colors.ANSI_CYAN + message;
+        return Colors.ANSI_BOLD_CYAN + message;
+    }
+
+    public static String resetColoredMessage(String message) {
+        return Colors.ANSI_BOLD_WHITE + message;
     }
 }

@@ -122,7 +122,7 @@ public class ConsoleApplication {
             int choice = scanner.nextInt();
             scanner.nextLine();
             switch (choice) {
-                case 1 -> showAlFavoriteAccounts();
+                case 1 -> showAllFavoriteAccounts();
                 case 2 -> addNewFavoriteAccount();
                 case 3 -> removeFavoriteAccount();
                 case 4 -> Logger.printHint("Backing to main menu ..");
@@ -134,7 +134,7 @@ public class ConsoleApplication {
     }
 
     private void removeFavoriteAccount() {
-        showAlFavoriteAccounts();
+        showAllFavoriteAccounts();
         Logger.warning("To go back to the main menu please enter -1");
         System.out.println("Please enter an account number to be removed from your favorite account list:");
         try {
@@ -175,7 +175,7 @@ public class ConsoleApplication {
             accountRepository.validateAccountNumber(accountNumber);
             Account favoriteAccount = accountRepository.getAccount(accountNumber);
             String userFullName = userRepository.getUserInfo(favoriteAccount.getUserId());
-            System.out.println("Are you sure you want to add " + Logger.coloredData(userFullName) + " as a favorite account? (y/n)");
+            System.out.println("Are you sure you want to add " + Logger.coloredData(userFullName) + Logger.resetColoredMessage(" as a favorite account? (y/n)"));
             String userInput = scanner.nextLine();
             if (userInput.equalsIgnoreCase("N")) {
                 Logger.printInfo("Adding account to your favorite list was canceled.");
@@ -190,15 +190,18 @@ public class ConsoleApplication {
         }
     }
 
-    private void showAlFavoriteAccounts() {
+    private void showAllFavoriteAccounts() {
         inputAccountPin();
-        List<Integer> favoriteAccounts = accountRepository.getAllFavoriteAccount(userAccount);
+        List<Account> favoriteAccounts = accountRepository.getAllFavoriteAccount(userAccount);
         if (favoriteAccounts.isEmpty()) {
             System.out.println("You have no favorite account list yet.");
             return;
         }
-        Logger.printInfo("Your favorite accounts IDs: ");
-        Logger.printInfo(favoriteAccounts.toString());
+        List<String> accountInfos = favoriteAccounts.stream()
+                .map(account -> account.getAccountNumber() + ": " + userRepository.getUserInfo(account.getUserId()))
+                .toList();
+        Logger.printInfo("Your favorite accounts: ");
+        Logger.printInfo(String.join("\n", accountInfos));
     }
 
     private void ShowResetPasswordPrompt() {
@@ -236,8 +239,8 @@ public class ConsoleApplication {
             scanner.nextLine();
             switch (choice) {
                 case 1 -> {
-                    System.out.println("Your transactions history:");
-                    System.out.println(transactionRepository.getTransactions(userAccount));
+                    Logger.printInfo("Your transactions history:");
+                    Logger.printInfo(String.join("\n", transactionRepository.getTransactions(userAccount).stream().map(Transaction::toString).toList()));
                 }
                 case 2 -> getDateAndShowTransactions();
 
@@ -256,7 +259,7 @@ public class ConsoleApplication {
     private void getDateAndShowTransactions() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         Logger.warning("To go back to the main menu please enter -1");
-        System.out.println("Please enter the start date " + Logger.coloredData("(format: dd-MM-yyyy)") + ": ");
+        System.out.println("Please enter the start date " + Logger.coloredData("(format: dd-MM-yyyy)") + Logger.resetColoredMessage(": "));
         String startDateString = scanner.nextLine();
         if (startDateString.equals("-1")) {
             return;
@@ -266,7 +269,7 @@ public class ConsoleApplication {
             throw new IllegalArgumentException("The date cannot be in the future. Please try again.");
         }
         Logger.warning("To go back to the main menu please enter -1");
-        System.out.println("Please enter the end date " + Logger.coloredData("(format: dd-MM-yyyy)") + ": ");
+        System.out.println("Please enter the end date " + Logger.coloredData("(format: dd-MM-yyyy)") + Logger.resetColoredMessage(": "));
         String toDateString = scanner.nextLine();
         if (toDateString.equals("-1")) {
             return;
@@ -279,8 +282,12 @@ public class ConsoleApplication {
             throw new IllegalArgumentException("The end date must be after the start date. Please try again.");
         }
 
-        Logger.printInfo("Transaction history between " + fromDate.toString() + " and " + toDate.toString());
-        System.out.println(transactionRepository.getTransactions(userAccount, fromDate, toDate));
+        Logger.printInfo("Transaction history between " + fromDate + " and " + toDate);
+        Logger.printInfo(
+                String.join("\n",
+                        transactionRepository.getTransactions(userAccount, fromDate, toDate).stream().map(Transaction::toString).toList()
+                )
+        );
 
     }
 
@@ -324,7 +331,7 @@ public class ConsoleApplication {
 
     private void showTransferPrompt() {
         try {
-            showAlFavoriteAccounts();
+            showAllFavoriteAccounts();
             Logger.warning("To go back to the main menu please enter -1");
             System.out.println("You may select an account from your favorites or provide a new account number.");
             System.out.println("Enter the recipient's account number: ");
@@ -345,13 +352,13 @@ public class ConsoleApplication {
             Account receiverAccount = accountRepository.getAccount(receiverAccountNumber);
             if (userAccount.getFavoriteAccounts().contains(receiverAccount.getAccountNumber())) {
                 accountRepository.transfer(userAccount.getAccountNumber(), receiverAccountNumber, amount);
-                System.out.println("Transfer completed successfully. Thank you for banking with us.");
+                Logger.printInfo("Transfer completed successfully. Thank you for banking with us.");
             } else {
                 String userFullName = userRepository.getUserInfo(receiverAccount.getUserId());
                 System.out.println("Do you want to transfer "
                         + amount + "$ to "
                         + Logger.coloredData(userFullName)
-                        + "? (y/n)");
+                        + Logger.resetColoredMessage("? (y/n)"));
                 String userAgreement = scanner.nextLine();
                 if (userAgreement.equalsIgnoreCase("Y")) {
                     accountRepository.transfer(userAccount.getAccountNumber(), receiverAccountNumber, amount);
@@ -376,9 +383,7 @@ public class ConsoleApplication {
         if (username.equals("-1")) {
             return;
         }
-        Logger.warning("To go back to the main menu please enter -1");
-        System.out.println("Please enter your password: ");
-        String password = scanner.nextLine();
+        String password = inputPassword(false);
         if (Objects.equals(password, "-1")) {
             return;
         }
@@ -396,7 +401,7 @@ public class ConsoleApplication {
         }
 
         //get password
-        String password = inputPassword();
+        String password = inputPassword(true);
         if (password.equals("-1")) {
             return;
         }
@@ -495,26 +500,30 @@ public class ConsoleApplication {
         return lastName;
     }
 
-    private String inputPassword() {
+    private String inputPassword(boolean isNewUser) {
         String password;
         do {
             try {
                 Logger.warning("To go back to the main menu please enter -1");
-                Logger.printInfo("Your password must meet the following criteria:\n"
-                        + "1. Be at least 6 characters long.\n"
-                        + "2. Contain at least one lowercase letter.\n"
-                        + "3. Contain at least one uppercase letter.\n"
-                        + "4. Include at least one digit.");
-                System.out.println("Please set your password: ");
-
+                if (isNewUser) {
+                    Logger.printInfo("Your password must meet the following criteria:\n"
+                            + "1. Be at least 6 characters long.\n"
+                            + "2. Contain at least one lowercase letter.\n"
+                            + "3. Contain at least one uppercase letter.\n"
+                            + "4. Include at least one digit.");
+                    System.out.println("Please set your password: ");
+                }
+                System.out.println("Please enter your password: ");
                 password = scanner.nextLine();
                 if (Objects.equals(password, "-1")) {
                     break;
                 }
-                userRepository.validatePassword(password);
+                if (isNewUser) {
+                    userRepository.validatePassword(password);
+                }
                 break;
             } catch (InvalidPasswordException e) {
-                System.out.println(e.getMessage());
+                Logger.error(e.getMessage());
             }
         } while (true);
         return password;
@@ -534,10 +543,12 @@ public class ConsoleApplication {
                 if (Objects.equals(username, "-1")) {
                     break;
                 }
-                userRepository.validateUsername(username, isNewUser);
+                if (isNewUser) {
+                    userRepository.validateUsername(username, isNewUser);
+                }
                 break;
             } catch (InvalidUserNameException e) {
-                System.out.println(e.getMessage());
+                Logger.error(e.getMessage());
             }
         } while (true);
         return username;
@@ -557,7 +568,7 @@ public class ConsoleApplication {
                 ;
                 break;
             } catch (InvalidPinException e) {
-                System.out.println(e.getMessage());
+                Logger.error(e.getMessage());
             }
         } while (true);
         return pin;
@@ -578,7 +589,7 @@ public class ConsoleApplication {
                     accountRepository.validateNormalWithdrawLimit(withdrawLimit);
                     break;
                 } catch (Exception e) {
-                    System.out.println(e.getMessage());
+                    Logger.error(e.getMessage());
                 }
             } while (true);
         } else {
@@ -593,8 +604,8 @@ public class ConsoleApplication {
             try {
                 Logger.warning("To go back to the main menu please enter -1");
                 System.out.println("What kind of Plan do you want? "
-                    + String.join(", ", Arrays.stream(AccountPlan.values())
-                    .map(plan -> plan.ordinal() + ":" + plan.name()).toList()));
+                        + String.join(", ", Arrays.stream(AccountPlan.values())
+                        .map(plan -> plan.ordinal() + ":" + plan.name()).toList()));
 
                 accountPlan = scanner.nextInt();
                 scanner.nextLine();
@@ -606,7 +617,7 @@ public class ConsoleApplication {
                 }
                 break;
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                Logger.error(e.getMessage());
             }
         } while (true);
         return accountPlan;
@@ -618,8 +629,8 @@ public class ConsoleApplication {
             try {
                 Logger.warning("To go back to the main menu please enter -1");
                 System.out.println("What kind of Account do you want? "
-                    + String.join(", ", Arrays.stream(AccountType.values())
-                    .map(plan -> plan.ordinal() + ":" + plan.name()).toList()));
+                        + String.join(", ", Arrays.stream(AccountType.values())
+                        .map(plan -> plan.ordinal() + ":" + plan.name()).toList()));
                 type = scanner.nextInt();
                 scanner.nextLine();
                 if (type == -1) {
@@ -631,7 +642,7 @@ public class ConsoleApplication {
                 break;
 
             } catch (Exception e) {
-                System.out.println("Invalid account type.");
+                Logger.error("Invalid account type.");
             }
         } while (true);
         return type;
@@ -654,7 +665,7 @@ public class ConsoleApplication {
                 break;
 
             } catch (Exception e) {
-                System.out.println("Invalid account type!");
+                Logger.error("Invalid account type!");
             }
         } while (true);
         return initialDeposit;

@@ -243,9 +243,10 @@ public class AccountRepository {
         }
     }
 
-    public List<Integer> getAllFavoriteAccount(Account account) {
+    public List<Account> getAllFavoriteAccount(Account account) {
         validateAccountNumber(account.getAccountNumber());
-        return accountNumberMap.get(account.getAccountNumber()).getFavoriteAccounts();
+        return accountNumberMap.get(account.getAccountNumber()).getFavoriteAccounts().stream()
+                .map(id -> accountNumberMap.get(id)).toList();
     }
 
     public void addNewFavoriteAccount(Account account, Account favoriteAccount) {
