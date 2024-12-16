@@ -9,12 +9,12 @@ public class Logger {
         System.out.println(Colors.colorize(message, Colors.ANSI_BOLD_GREEN));
     }
 
-    public static void printCustomerMenu(String message) {
-        System.out.println(Colors.colorize(message, Colors.ANSI_BOLD_PURPLE));
-    }
-
     public static void printSubMenu(String message) {
         System.out.println(Colors.colorize(message, Colors.ANSI_BOLD_CYAN));
+    }
+
+    public static void printInfo(String message) {
+        System.out.println(Colors.colorize(message, Colors.ANSI_BOLD_PURPLE));
     }
 
     public static void warning(String message) {
@@ -27,5 +27,9 @@ public class Logger {
 
     public static void printStartEnd(String message) {
         System.out.println(Colors.colorize(message, Colors.ANSI_BOLD_BLUE));
+    }
+
+    public static String coloredData(String message) {
+        return Colors.ANSI_CYAN + message;
     }
 }

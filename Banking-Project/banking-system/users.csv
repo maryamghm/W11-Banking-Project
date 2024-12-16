@@ -4,6 +4,9 @@ id,username,password,firstName,lastName,type,isActive
 2,test2,"94ba69fdd6ac7c1576e4b079514aa04004822824",John,Smith,CUSTOMER,true
 3,test3,"94ba69fdd6ac7c1576e4b079514aa04004822824",Jane,Oscar,CUSTOMER,true
 8,test8,"94ba69fdd6ac7c1576e4b079514aa04004822824",Amir,Tey,CUSTOMER,true
+9,test9,"94ba69fdd6ac7c1576e4b079514aa04004822824",Nobody,Nowhere,CUSTOMER,true
+11,test11,"94ba69fdd6ac7c1576e4b079514aa04004822824",Test11,Test11,CUSTOMER,true
 6,test6,"94ba69fdd6ac7c1576e4b079514aa04004822824",John,Doe,CUSTOMER,true
+10,test10,"94ba69fdd6ac7c1576e4b079514aa04004822824",Firstname,Lastname,CUSTOMER,true
 7,test7,"94ba69fdd6ac7c1576e4b079514aa04004822824",Mehdi,Tey,CUSTOMER,true
 1,test1,"94ba69fdd6ac7c1576e4b079514aa04004822824",Leo,Brown,CUSTOMER,true

@@ -78,7 +78,6 @@ public class UserRepository {
     public User signUp(String username, String password, String firstName, String lastName) {
         User user = createNewUser(username, password, firstName, lastName);
         userNameToUserMap.put(user.getUsername(), user);
-        System.out.println("Welcome " + username);
         return user;
     }
 
