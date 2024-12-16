@@ -63,7 +63,7 @@ public class AccountRepository {
                         accountNumberMap.put(account.getAccountNumber(), account);
                     });
 
-            accountNumberCounter = accountNumberMap.keySet().stream().max(Integer::compareTo).orElse(0);
+            accountNumberCounter = accountNumberMap.keySet().stream().max(Integer::compareTo).orElse(10000);
 
         } catch (IOException e) {
             throw new RuntimeException(e);

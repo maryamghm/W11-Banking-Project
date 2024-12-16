@@ -194,7 +194,7 @@ public class ConsoleApplication {
         inputAccountPin();
         List<Account> favoriteAccounts = accountRepository.getAllFavoriteAccount(userAccount);
         if (favoriteAccounts.isEmpty()) {
-            System.out.println("You have no favorite account list yet.");
+            Logger.printInfo("You have no favorite account list yet.");
             return;
         }
         List<String> accountInfos = favoriteAccounts.stream()
@@ -512,8 +512,10 @@ public class ConsoleApplication {
                             + "3. Contain at least one uppercase letter.\n"
                             + "4. Include at least one digit.");
                     System.out.println("Please set your password: ");
+                } else {
+                    System.out.println("Please enter your password: ");
                 }
-                System.out.println("Please enter your password: ");
+
                 password = scanner.nextLine();
                 if (Objects.equals(password, "-1")) {
                     break;
