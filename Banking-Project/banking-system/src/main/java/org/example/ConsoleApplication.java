@@ -8,6 +8,7 @@ import org.example.repository.AccountRepository;
 import org.example.repository.TransactionRepository;
 import org.example.repository.UserRepository;
 import org.example.utils.Colors;
+import org.example.utils.Logger;
 
 import java.io.File;
 import java.time.LocalDate;
@@ -30,7 +31,7 @@ public class ConsoleApplication {
         accountRepository = AccountRepository.getInstance(new File("accounts.csv"));
         transactionRepository = TransactionRepository.getInstance(new File("transactions.csv"));
         boolean isRunning = true;
-        System.out.println(Colors.colorize("Welcome to Banking Management System!", Colors.ANSI_BOLD_BLUE));
+        Logger.printStartEnd("Welcome to Banking Management System!");
         while (isRunning) {
             if (loggedInUser == null) {
                 isRunning = showNoLoginMenu();
@@ -48,10 +49,10 @@ public class ConsoleApplication {
     }
 
     private boolean showNoLoginMenu() {
-        System.out.println(Colors.colorize("Menu:", Colors.ANSI_BOLD_GREEN));
-        System.out.println(Colors.colorize("1. SignUp", Colors.ANSI_BOLD_GREEN));
-        System.out.println(Colors.colorize("2. Login", Colors.ANSI_BOLD_GREEN));
-        System.out.println(Colors.colorize("3. Exit", Colors.ANSI_BOLD_GREEN));
+        Logger.printMainMenu("Menu:");
+        Logger.printMainMenu("1. SignUp");
+        Logger.printMainMenu("2. Login");
+        Logger.printMainMenu("3. Exit");
         try {
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -66,32 +67,32 @@ public class ConsoleApplication {
                     exitSystem();
                     return false;
                 }
-                default -> System.out.println("Choose an action between 1-3: ");
+                default -> Logger.warning("Choose an action between 1-3:");
             }
         } catch (Exception e) {
-            System.err.println("ERROR: " + e.getMessage());
+            Logger.error("ERROR: " + e.getMessage());
         }
         return true;
     }
 
     private void exitSystem() {
-        System.out.println(Colors.colorize("Goodbye!", Colors.ANSI_BOLD_BLUE));
+        Logger.printStartEnd("Goodbye!");
         userRepository.writeUsersInFile();
         accountRepository.writeAccountsIntoFile();
         transactionRepository.saveTransactions();
     }
 
     private boolean showCustomerMenu() {
-        System.out.println(Colors.colorize("Menu For Customers: ", Colors.ANSI_BOLD_PURPLE));
-        System.out.println(Colors.colorize("1. Show Balance", Colors.ANSI_BOLD_PURPLE));
-        System.out.println(Colors.colorize("2. Deposit", Colors.ANSI_BOLD_PURPLE));
-        System.out.println(Colors.colorize("3. Withdraw", Colors.ANSI_BOLD_PURPLE));
-        System.out.println(Colors.colorize("4. Transfer", Colors.ANSI_BOLD_PURPLE));
-        System.out.println(Colors.colorize("5. Favorite Account", Colors.ANSI_BOLD_PURPLE));
-        System.out.println(Colors.colorize("6. Show Transactions History", Colors.ANSI_BOLD_PURPLE));
-        System.out.println(Colors.colorize("7. Reset Password", Colors.ANSI_BOLD_PURPLE));
-        System.out.println(Colors.colorize("8. Deactivate account", Colors.ANSI_BOLD_PURPLE));
-        System.out.println(Colors.colorize("9. Logout", Colors.ANSI_BOLD_PURPLE));
+        Logger.printCustomerMenu("Menu For Customers:");
+        Logger.printCustomerMenu("1. Show Balance");
+        Logger.printCustomerMenu("2. Deposit");
+        Logger.printCustomerMenu("3. Withdraw");
+        Logger.printCustomerMenu("4. Transfer");
+        Logger.printCustomerMenu("5. Favorite Account");
+        Logger.printCustomerMenu("6. Show Transactions History");
+        Logger.printCustomerMenu("7. Reset Password");
+        Logger.printCustomerMenu("8. Deactivate account");
+        Logger.printCustomerMenu("9. Logout");
         try {
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -105,20 +106,20 @@ public class ConsoleApplication {
                 case 7 -> ShowResetPasswordPrompt();
                 case 8 -> showDeactivateAccountPrompt();
                 case 9 -> logOut();
-                default -> System.out.println("Choose an action between 1-9: ");
+                default -> Logger.warning("Choose an action between 1-9: ");
             }
         } catch (Exception e) {
-            System.err.println("ERROR: " + e.getMessage());
+            Logger.error("ERROR: " + e.getMessage());
         }
         return true;
     }
 
     private void showFavoriteAccountsMenu() {
-        System.out.println(Colors.colorize("Choose one action: ", Colors.ANSI_BOLD_CYAN));
-        System.out.println(Colors.colorize("1. Show Favorite Accounts", Colors.ANSI_BOLD_CYAN));
-        System.out.println(Colors.colorize("2. Add a new Favorite Account", Colors.ANSI_BOLD_CYAN));
-        System.out.println(Colors.colorize("3. Remove a Favorite Account", Colors.ANSI_BOLD_CYAN));
-        System.out.println(Colors.colorize("4. Exit Favorite Accounts Menu", Colors.ANSI_BOLD_CYAN));
+        Logger.printSubMenu("Choose one action: ");
+        Logger.printSubMenu("1. Show Favorite Accounts");
+        Logger.printSubMenu("2. Add a new Favorite Account");
+        Logger.printSubMenu("3. Remove a Favorite Account");
+        Logger.printSubMenu("4. Exit Favorite Accounts Menu");
         try {
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -126,11 +127,11 @@ public class ConsoleApplication {
                 case 1 -> showAlFavoriteAccounts();
                 case 2 -> addNewFavoriteAccount();
                 case 3 -> removeFavoriteAccount();
-                case 4 -> System.out.println("backing to main menu ..");
-                default -> System.out.println("Choose 1-4: ");
+                case 4 -> Logger.printHint("Backing to main menu ..");
+                default -> Logger.warning("Choose an action between 1-4: ");
             }
         } catch (Exception e) {
-            System.err.println("ERROR: " + e.getMessage());
+            Logger.error("ERROR: " + e.getMessage());
         }
     }
 
@@ -154,7 +155,7 @@ public class ConsoleApplication {
                 throw new IllegalArgumentException("Invalid user's input.");
             }
         } catch (Exception e) {
-            System.err.println("ERROR: " + e.getMessage());
+            Logger.error("ERROR: " + e.getMessage());
         }
 
     }
@@ -178,7 +179,7 @@ public class ConsoleApplication {
                 throw new IllegalArgumentException("Invalid user's input.");
             }
         } catch (Exception e) {
-            System.err.println("ERROR: " + e.getMessage());
+            Logger.error("ERROR: " + e.getMessage());
         }
     }
 
@@ -204,9 +205,9 @@ public class ConsoleApplication {
 
     private void showTransactionHistoryPrompt() {
         inputAccountPin();
-        System.out.println(Colors.colorize("Choose an action:", Colors.ANSI_BOLD_CYAN));
-        System.out.println(Colors.colorize("1. Show All Transactions", Colors.ANSI_BOLD_CYAN));
-        System.out.println(Colors.colorize("2. Show Transaction History within a specified date range", Colors.ANSI_BOLD_CYAN));
+        Logger.printSubMenu("Choose an action:");
+        Logger.printSubMenu("1. Show All Transactions");
+        Logger.printSubMenu("2. Show Transaction History within a specified date range");
         try {
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -280,7 +281,7 @@ public class ConsoleApplication {
             }
 
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            Logger.error("ERROR: " + e.getMessage());
         }
     }
 
@@ -314,7 +315,7 @@ public class ConsoleApplication {
             }
 
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            Logger.error("ERROR: " + e.getMessage());
         }
     }
 
