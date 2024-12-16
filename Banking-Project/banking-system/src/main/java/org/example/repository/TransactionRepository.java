@@ -35,6 +35,10 @@ public class TransactionRepository {
         this.transactions = new ArrayList<>(loadTransactions());
     }
 
+    void clear() {
+        transactions.clear();
+    }
+
     public static TransactionRepository getInstance(File dataSource) {
         if (transactionRepositoryInstance == null) {
             return transactionRepositoryInstance = new TransactionRepository(dataSource);
@@ -86,5 +90,9 @@ public class TransactionRepository {
         CsvMapperUtils.getInstance()
                 .writer(writerSchema)
                 .writeValue(dataSource, transactions);
+    }
+
+    int getSize() {
+        return transactions.size();
     }
 }

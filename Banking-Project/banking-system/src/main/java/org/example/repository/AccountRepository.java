@@ -43,6 +43,11 @@ public class AccountRepository {
         return Objects.requireNonNullElseGet(accountRepositoryInstance, () -> accountRepositoryInstance = new AccountRepository(dataSource));
     }
 
+    void clear() {
+        userAccountMap.clear();
+        accountNumberMap.clear();
+    }
+
     private void populateAccounts() {
         CsvMapper csvMapper = new CsvMapper();
         CsvSchema schema = csvMapper.schemaFor(Account.class)

@@ -18,13 +18,18 @@ public class UserRepository {
     private final Map<Integer, User> userIdToUserMap = new HashMap<>();
     private int idCounter;
     private final File dataSource;
-    private final int MAX_LOGIN_ATTEMPTS = 3;
+    private static final int MAX_LOGIN_ATTEMPTS = 3;
 
     private static UserRepository userRepositoryInstance = null;
 
     private UserRepository(File dataSource) {
         this.dataSource = dataSource;
         populateUsersList();
+    }
+
+    void clear() {
+        userNameToUserMap.clear();
+        userIdToUserMap.clear();
     }
 
     public static UserRepository getInstance(File datasource) {
@@ -94,7 +99,7 @@ public class UserRepository {
 
     public void validateUsername(String username, boolean isNewUser) {
         if (isNewUser && userNameToUserMap.containsKey(username)) {
-            throw new InvalidPasswordException("Username is already exists");
+            throw new SignupFailedException("Username is already exists");
         }
         if (username == null || username.isBlank() || !username.matches("^[^A-Z]*$")) {
             throw new InvalidUserNameException("Username is not valid. It shoudn't contain any Uppercase letters.");

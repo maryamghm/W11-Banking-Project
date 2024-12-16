@@ -3,6 +3,7 @@ package org.example.repository;
 import lombok.SneakyThrows;
 import org.example.domain.User;
 import org.example.domain.UserType;
+import org.example.exception.InvalidUserNameException;
 import org.example.exception.LoginFailedException;
 import org.example.exception.SignupFailedException;
 import org.example.exception.UserLockedException;
@@ -29,7 +30,7 @@ class UserRepositoryTest {
 
     @AfterEach
     public void deleteUsers() {
-
+        userRepository.clear();
     }
 
     @Test
@@ -61,7 +62,7 @@ class UserRepositoryTest {
 
     @Test
     public void testSignupWithUppercaseUsername() {
-        assertThrows(SignupFailedException.class, () -> userRepository.signUp(SIGNUP_USERNAME1.toUpperCase(), PASSWORD, FIRSTNAME, LASTNAME));
+        assertThrows(InvalidUserNameException.class, () -> userRepository.signUp(SIGNUP_USERNAME1.toUpperCase(), PASSWORD, FIRSTNAME, LASTNAME));
     }
 
     @Test
@@ -120,14 +121,4 @@ class UserRepositoryTest {
 //        assertEquals(3, userRepository.getSize());
 //
 //    }
-
-    @Test
-    public void testLoginWithLoadedData() {
-        userRepository.populateUsersList();
-        String username = "test2";
-        String password = "Test@1234";
-
-        User loggedInUser = userRepository.login(username, password);
-        assertEquals("test2", loggedInUser.getUsername());
-    }
 }

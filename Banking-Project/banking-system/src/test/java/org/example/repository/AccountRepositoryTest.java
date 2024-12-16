@@ -5,6 +5,7 @@ import org.example.domain.Account;
 import org.example.domain.AccountPlan;
 import org.example.domain.AccountType;
 import org.example.domain.User;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,6 +27,12 @@ public class AccountRepositoryTest {
         accountRepository = AccountRepository.getInstance(new File(filePath));
         URI usersFilePath = getClass().getClassLoader().getResource("users.csv").toURI();
         userRepository = UserRepository.getInstance(new File(usersFilePath));
+    }
+
+    @AfterEach
+    public void clearLists() {
+        accountRepository.clear();
+        userRepository.clear();
     }
 
     @Test

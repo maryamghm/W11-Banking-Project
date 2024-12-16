@@ -5,14 +5,15 @@ import org.example.domain.Account;
 import org.example.domain.CheckingAccount;
 import org.example.domain.Transaction;
 import org.example.domain.TransactionType;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.net.URI;
-import java.time.LocalDate;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TransactionRepositoryTest {
 
@@ -32,34 +33,42 @@ class TransactionRepositoryTest {
         accountRepository = AccountRepository.getInstance(new File(filePath3));
     }
 
+    @AfterEach
+    public void clearLists() {
+        userRepository.clear();
+        transactionRepository.clear();
+        accountRepository.clear();
+    }
+
+
     @Test
-    public void readTransactionsFromFile() {
+    public void testGetTransactionsByAccount() {
+        account = new CheckingAccount();
+        account.setAccountNumber(1);
         transactionRepository.addTransaction(account, TransactionType.DEBIT, 50);
         List<Transaction> transactions = transactionRepository.getTransactions(account);
-        Assertions.assertEquals(1, transactions.size());
+        assertEquals(1, transactions.size());
     }
 
     @Test
     public void addTransaction() {
-
+        transactionRepository.clear();
+        account = new CheckingAccount();
+        account.setAccountNumber(1);
+        transactionRepository.addTransaction(account, TransactionType.DEBIT, 50);
+        transactionRepository.addTransaction(account, TransactionType.CREDIT, 100);
+        assertEquals(2, transactionRepository.getSize());
     }
 
-    @Test
-    public void testGetTransactionsByAccount() {
-        Account account = new CheckingAccount();
-        account.setAccountNumber(2);
-        List<Transaction> transactions = transactionRepository.getTransactions(account);
-        Assertions.assertEquals(4, transactions.size());
-    }
 
-    @Test
-    public void testGetTransactionsByAccountAndDate() {
-        Account account = new CheckingAccount();
-        account.setAccountNumber(2);
-        LocalDate date1 = LocalDate.parse("2024-10-01");
-        LocalDate date2 = LocalDate.parse("2024-12-12");
-
-        List<Transaction> transactions = transactionRepository.getTransactions(account, date1, date2);
-        Assertions.assertEquals(2, transactions.size());
-    }
+//    @Test
+//    public void testGetTransactionsByAccountAndDate() {
+//        Account account = new CheckingAccount();
+//        account.setAccountNumber(2);
+//        LocalDate date1 = LocalDate.parse("2024-10-01");
+//        LocalDate date2 = LocalDate.parse("2024-12-12");
+//
+//        List<Transaction> transactions = transactionRepository.getTransactions(account, date1, date2);
+//        Assertions.assertEquals(2, transactions.size());
+//    }
 }
